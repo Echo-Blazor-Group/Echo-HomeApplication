@@ -24,6 +24,7 @@ namespace DTOs.RealtorDTOs
         public string? Password { get; set; }
         [Required]
         public int? RealtorFirmId { get; set; }
-        public string ProfilePicture { get; set; }
+        [Required]
+        public string ProfilePicture { get; set; } = "https://shorturl.at/CJOR3";
     }
 }
