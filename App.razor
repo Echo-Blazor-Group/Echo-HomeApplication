@@ -1,28 +1,14 @@
-﻿@using Microsoft.AspNetCore.Components.Authorization
-@* <Router AppAssembly="@typeof(App).Assembly">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-    <NotFound>
-        <PageTitle>Not found</PageTitle>
-        <LayoutView Layout="@typeof(MainLayout)">
-            <p role="alert">Sorry, there's nothing at this address.</p>
-        </LayoutView>
-    </NotFound>
-</Router> *@
+﻿@inject NavigationManager Navigation
 
-@inject NavigationManager Navigation 
-
- <CascadingAuthenticationState>
+<CascadingAuthenticationState>
     <Router AppAssembly="typeof(App).Assembly">
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)">
                 <NotAuthorized>
                     @if (context.User.Identity?.IsAuthenticated == false)
                     {
-                      <p>Redirecting to login page...</p>
-                         Navigation.NavigateTo("/login");
+                        <p><em>Redirecting to login page..</em>.</p>
+                        Navigation.NavigateTo("/login");
                     }
                     else
                     {
@@ -42,3 +28,18 @@
         </NotFound>
     </Router>
 </CascadingAuthenticationState>
+
+
+
+@* <Router AppAssembly="@typeof(App).Assembly">
+    <Found Context="routeData">
+        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+    </Found>
+    <NotFound>
+        <PageTitle>Not found</PageTitle>
+        <LayoutView Layout="@typeof(MainLayout)">
+            <p role="alert">Sorry, there's nothing at this address.</p>
+        </LayoutView>
+    </NotFound>
+</Router> *@
