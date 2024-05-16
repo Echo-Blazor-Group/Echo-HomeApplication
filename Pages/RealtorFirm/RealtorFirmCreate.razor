@@ -1,0 +1,89 @@
+﻿@page "/realtorfirm/create"
+@using System.Net
+@inject HttpClient httpClient
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@{
+    /// <summary>
+    /// Author: Samed Salman
+    /// This page is for creating a new realtor firm.
+    /// </summary>
+}
+
+<PageTitle>Add new realtor firm</PageTitle>
+
+<h1>Add new realtor firm</h1>
+
+<div class="row">
+    <div class="col-md-4">
+    <EditForm method="post" Model="RealtorFirm" OnValidSubmit="AddRealtorFirmAsync" FormName="create" >
+        <DataAnnotationsValidator />
+        @* <RealtorFirmEditForm /> TODO: (Samed) Try to make the component work with EventCallBack *@
+        <div class="mb-3">
+            <label for="name" class="form-label">Name: </label>
+            <InputText id="name" @bind-Value="RealtorFirm.Name" class="form-control" />
+            <ValidationMessage For="() => RealtorFirm.Name" class="text-danger" />
+        </div>
+        <div class="mb-3">
+            <label for="presentation" class="form-label">About this firm: </label>
+            <InputTextArea id="presentation" @bind-Value="RealtorFirm.RealtorFirmPresentation" class="form-control" />
+            <ValidationMessage For="() => RealtorFirm.RealtorFirmPresentation" class="text-danger" />
+        </div>
+        <div class="mb-3">
+            <label for="Logotype" class="form-label">Logotype URL: </label>
+            <InputTextArea id="Logotype" @bind-Value="RealtorFirm.Logotype" class="form-control" />
+            <ValidationMessage For="() => RealtorFirm.Logotype" class="text-danger" />
+        </div>
+        <div class="mb-3">
+            @* TODO: Use @onchange to give RealtorFirm.Logotype value more dynamically?
+            Make the logotype display here after URL is input *@
+            @if (RealtorFirm.Logotype != null)
+            {
+                <img src="@RealtorFirm.Logotype" alt="Logotype for @RealtorFirm.Name" width="200px" />
+            }
+        </div>
+        <div class="mb-3">
+            <Button Type="ButtonType.Link" To="/realtorfirms" Color="ButtonColor.Secondary"><Icon Name="IconName.ArrowReturnLeft" /> Cancel</Button>
+            <Button Type="ButtonType.Submit" Color="ButtonColor.Primary"><Icon Name="IconName.ClipboardPlus" /> Add</Button>
+        </div>
+    </EditForm>
+    </div>
+</div>
+
+
+@code {
+    [SupplyParameterFromForm]
+    public RealtorFirmPostDTO RealtorFirm { get; set; } = new();
+
+    // Http-post call on form submit
+    private async Task AddRealtorFirmAsync()
+    {
+        // Variable to catch response message
+        HttpResponseMessage response = new HttpResponseMessage();
+
+        try
+        {
+            response = await httpClient.PostAsJsonAsync("https://localhost:7190/api/RealtorFirm", RealtorFirm);
+            // TODO: (Samed) Get Location in Http-response and extract id
+            // Redirect to to details page
+            // Show success Toast-message or Blazor Alert on next page
+
+            // In the meantime, navigate to list of realtor firms
+            NavigationManager.NavigateTo("/realtorfirms");
+        }
+        catch(WebException ex) when (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+        catch (WebException ex) when (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            // (Samed) Show toast message or Blazor Alert
+            // ToastMessage badRequestMessage = new ToastMessage(ToastType.Danger, $"Realtor firm doesn't exist: {response.StatusCode}.");
+            // ToastService.Notify(badRequestMessage);
+        }
+        catch (WebException ex) when (response.StatusCode == HttpStatusCode.InternalServerError)
+        {
+            // (Samed) Show toast message or Blazor Alert
+        }
+    }
+}

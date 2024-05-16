@@ -1,0 +1,289 @@
+﻿@page "/EstateDetails/{id:int}"
+@using DTOs.EstateDtos
+@using Echo_HemAPI.Data.Models.DTOs.PictureDtos
+@using System.Net
+@using Newtonsoft.Json
+
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+@*author Gustaf*@
+
+<PageTitle>Estates</PageTitle>
+
+<h3>Estates</h3>
+
+@if (_Estate.Id == 0)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <button class="btn btn-primary" @onclick="@(() => EstateNavigate())">Back</button>
+    <table class="table">
+        <thead>
+            <tr>
+                @* <th>Id</th> *@
+                <th>Address</th>
+                <th>Starting Price</th>
+                <th>Living Area Kvm</th>
+                <th>Number Of Rooms</th>
+                <th>BiArea Kvm</th>
+                <th>Estate Area Kvm</th>
+                <th>Monthly Fee</th>
+                <th>Running Costs</th>
+                <th>Construction Date</th>
+                @* <th>Estate Description</th> *@
+                <th>Publish Date</th>
+                <th>County</th>
+                <th>Category</th>
+                <th>Realtor</th>
+            </tr>
+            <tr>
+                @* <td>@estate.Id</td> *@
+                <td>@_Estate.Address</td>
+                <td>@_Estate.StartingPrice</td>
+                <td>@_Estate.LivingAreaKvm</td>
+                <td>@_Estate.NumberOfRooms</td>
+                <td>@_Estate.BiAreaKvm</td>
+                <td>@_Estate.EstateAreaKvm</td>
+                <td>@_Estate.MonthlyFee</td>
+                <td>@_Estate.RunningCosts</td>
+                <td>@_Estate.ConstructionDate</td>
+                @* <td>@_Estate.EstateDescription</td> *@
+                <td>@_Estate.PublishDate</td>
+                <td>@_Estate?.County?.CountyName</td>
+                <td>@_Estate?.Category?.EstateCategory</td>
+                <td>@_Estate?.Realtor?.FirstName @_Estate?.Realtor?.LastName</td>
+                <td><button class="btn btn-primary" @onclick="@(() => EstateEdit(@_Estate.Id))">Edit</button></td>
+                @if (_Estate.OnTheMarket == false)
+                {
+                    <td><button class="btn btn-primary" @onclick="@(() => Remove())">Return</button></td>
+                }
+                else
+                {
+                    <td><button class="btn btn-primary" @onclick="@(() => Remove())">Remove</button></td>
+                }
+                <td><button class="btn btn-primary" @onclick="@(() => ShowAddPicture(_Estate.Id))">Add Image</button></td>
+            </tr>
+            <tr> 
+                <th>Estate Description</th>
+            </tr>
+            
+                <p width="200px">@_Estate.EstateDescription</p>
+
+            <tr>
+                @foreach (var picture in _Estate.Pictures)
+                {
+                    <img src="@picture.PictureUrl" width="100px" />
+                    <td><button Class="btn btn-primary" @onclick="@(() => ShowEditImages(picture.Id))">Edit Image</button></td>
+                }
+            </tr>
+        </thead>
+    </table>
+}
+@if (WishToRemoveFromMarket == true)
+{
+    <EditForm Model="_Estate" OnSubmit="RemoveEstateFromMarket">
+        <div>
+
+            <InputCheckbox hidden id="RemoveFromMarket" @bind-Value="_Estate.OnTheMarket" class="form-check" />
+        </div>
+        @if (_Estate.OnTheMarket == true)
+        {
+            <div>
+                <button type="submit" class="btn btn-primary">Remove From Market</button>
+                <button class="btn btn-primary" @onclick="@(() => Remove())">Don´t remove</button>
+            </div>
+        }
+        else
+        {
+            <div>
+                <button type="submit" class="btn btn-primary">Return To Market</button>
+                <button class="btn btn-primary" @onclick="@(() => Remove())">Don´t Return to market</button>
+            </div>
+        }
+
+    </EditForm>
+}
+
+@if (WishToEditImages == true)
+{
+    <td><button Class="btn btn-primary" @onclick="@(() => DeleteAsync(_Picture.Id))">Delete</button></td>
+    <EditForm Model="_Picture" OnSubmit="EditImage">
+        <div>
+            <label onformchange="PictureUrl"> Url </label>
+            <InputText id="PictureUrl" @bind-Value="_Picture.PictureUrl" class="form-control" />
+        </div>
+        <div>
+            
+            <InputNumber hidden id="EstateId" @bind-Value="_Picture.EstateId" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </EditForm>
+    <p></p>
+    <div>
+        <img src="@_Picture.PictureUrl" width="800px" />
+    </div>
+}
+@if (WishToAddImages == true)
+{
+    <EditForm Model="_PictureInsert" OnSubmit="AddPicture">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+        <div>
+            <label onformchange="PictureUrl"> Url </label>
+            <InputText id="PictureUrl" @bind-Value="_PictureInsert.PictureUrl" class="form-control" />
+        </div>
+        <div>
+            <label onformchange="Id"></label>
+            <InputNumber hidden @bind-Value="_PictureInsert.EstateId" class="form-control" />
+        </div> 
+        <button type="submit" class="btn btn-primary">Add Image</button>
+    </EditForm>
+    <p></p>
+    <div>
+        <img src="@_PictureInsert.PictureUrl" width="400px" />
+    </div>
+}
+
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    // placeholder="@Id"
+    public int? PictureId { get; set; }
+
+    [SupplyParameterFromForm]
+    public PictureDto _Picture { get; set; } = new PictureDto();
+    public InsertPictureDto _PictureInsert { get; set; } = new InsertPictureDto();
+    public bool WishToRemoveFromMarket { get; set; }
+    public bool WishToEditImages { get; set; }
+    public bool WishToAddImages { get; set; }
+
+    [SupplyParameterFromForm]
+    public EstateDto _Estate { get; set; } = new EstateDto();
+
+    private EditContext editContext;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500); 
+        _PictureInsert.EstateId = Id ?? 0;
+
+        if (Id is not null)
+        {
+            try
+            {
+                var result = await http.GetFromJsonAsync<EstateDto>($"https://localhost:7190/api/Estate/{Id}");
+                if (result is not null)
+                {
+                    _Estate = result;
+                }
+            }
+            catch (JsonException ex)
+            {
+                Console.WriteLine($"Deserialization error: {ex.Message}");
+            }
+        }
+    }
+    async Task RemoveEstateFromMarket()
+    {
+        if (WishToRemoveFromMarket == true)
+        {
+            var result = await http.PatchAsJsonAsync($"https://localhost:7190/api/Estate/{Id}", _Estate);
+            NavigationManager.NavigateTo("Estates");
+        }
+        else { WishToRemoveFromMarket = false; }
+
+    }
+    void EstateNavigate()
+    {
+        NavigationManager.NavigateTo("Estates");
+    }
+    async Task Remove()
+    {
+        //Simplified function provided by Sebbe!
+        WishToRemoveFromMarket = !WishToRemoveFromMarket;
+        //  if (WishToRemoveFromMarket == false) { WishToRemoveFromMarket = true; }
+        // else { WishToRemoveFromMarket = false; }
+    }
+
+    //Methods for editing images
+    async Task ShowEditImages(int id)
+    {
+        //if a picture edit button is clicked and its not the same picture that is already being edited, then switch or 
+        //just open that picture for editing instead.
+        //otherwise just close the edit or open the edit.
+        WishToEditImages = true;
+        if (id == PictureId)
+        {
+            WishToEditImages = !WishToEditImages;
+        }
+        else
+        { 
+            PictureId = id;
+            var pictures = await http.GetFromJsonAsync<PictureDto>($"https://localhost:7190/api/Pictures/{PictureId}");
+            if (pictures is not null)
+            {
+                _Picture = pictures;
+            } 
+        }
+    }
+
+    async Task EditImage()
+    {
+        if (WishToEditImages == true)
+        {
+            var result = await http.PatchAsJsonAsync($"https://localhost:7190/api/Pictures/{PictureId}",
+            _Picture);
+
+            NavigationManager.NavigateTo($"EstateDetails/{Id}", true);
+        }
+        else { WishToEditImages = false; }
+    }
+
+    async Task ShowAddPicture(int id)
+    {
+        WishToAddImages = !WishToAddImages;
+        _PictureInsert.EstateId = id;
+    }
+    async Task AddPicture()
+    {
+        var result = await http.PostAsJsonAsync($"https://localhost:7190/api/Pictures", _PictureInsert);
+        NavigationManager.NavigateTo($"EstateDetails/{Id}", true);
+    }
+
+    void EstateEdit(int id)
+    {
+        NavigationManager.NavigateTo($"EstateEdit/{id}");
+    }
+
+    private async Task DeleteAsync(int id)
+    {
+        //stolen from samed, thank you samed
+        HttpResponseMessage response = new();
+        try
+        {
+            var result = await http.DeleteAsync($"https://localhost:7190/api/Pictures/{PictureId}");
+            NavigationManager.NavigateTo($"EstateDetails/{Id}", true); 
+        }
+        catch (WebException ex) when (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+        catch (WebException ex) when (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            // (Samed) Show toast message or Blazor Alert
+            // ToastMessage badRequestMessage = new ToastMessage(ToastType.Danger, $"Realtor firm doesn't exist: {response.StatusCode}.");
+            // ToastService.Notify(badRequestMessage);
+        }
+        catch (WebException ex) when (response.StatusCode == HttpStatusCode.InternalServerError)
+        {
+            // (Samed) Show toast message or Blazor Alert
+        }
+    }
+}

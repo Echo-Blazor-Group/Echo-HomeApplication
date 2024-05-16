@@ -1,0 +1,62 @@
+﻿@using Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inject IAuthenticationService AuthenticationService
+@inject NavigationManager NavigationManager
+
+
+@{
+    ///<summary>
+    /// Author: Samed
+    /// This component checks if a user is logged in and displays login link, alternatively user name and logout button
+    ///</summary>
+}
+
+@* If a user is logged in, display user name and show logout button *@
+@if(isLoggedIn)
+{
+    <li class="nav-item">
+        <NavLink class="nav-link" href="/realtor">
+            <span class="oi oi-plus" aria-hidden="true"></span> @userName
+        </NavLink>
+    </li>
+    <li class="nav-item">
+        <Button Type="ButtonType.Submit" Color="ButtonColor.Primary" @onclick="LogoutAsync" value="Logout">Logout</Button>
+    </li>
+    
+}
+@* Else, show login link *@
+else
+{
+    <li class="nav-item">
+        <NavLink class="nav-link" href="/login">
+            <span class="oi oi-plus" aria-hidden="true"></span> Login
+        </NavLink>
+    </li>
+}
+
+
+@code {
+    // Variable to display name
+    private string? userName;
+    // User is logged in if the LoginChange event holds a name string
+    private bool isLoggedIn => userName is not null;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+
+        // Extract userName from LoginChange event
+        AuthenticationService.LoginChange += name =>
+        {
+            userName = name;
+            // Refresh rendering
+            StateHasChanged();
+        };
+    }
+
+    private async Task LogoutAsync()
+    {
+        await AuthenticationService.LogoutAsync();
+        NavigationManager.NavigateTo("/");
+    }
+}

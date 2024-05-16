@@ -1,0 +1,38 @@
+﻿@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@{
+    /// <summary>
+    /// Author: Samed Salman
+    /// Edit Form component for re-use in different pages
+    /// </summary>
+}
+
+<div class="mb-3">
+    <label for="name" class="form-label">Name: </label>
+    <InputText id="name" @bind-Value="RealtorFirm.Name" class="form-control" />
+    <ValidationMessage For="() => RealtorFirm.Name" class="text-danger" />
+</div>
+<div class="mb-3">
+    <label for="presentation" class="form-label">About this firm: </label>
+    <InputTextArea id="presentation" @bind-Value="RealtorFirm.RealtorFirmPresentation" class="form-control" />
+    <ValidationMessage For="() => RealtorFirm.RealtorFirmPresentation" class="text-danger" />
+</div>
+<div class="mb-3">
+    <label for="Logotype" class="form-label">Logotype URL: </label>
+    <InputTextArea id="Logotype" @bind-Value="RealtorFirm.Logotype" class="form-control" />
+    <ValidationMessage For="() => RealtorFirm.Logotype" class="text-danger" />
+</div>
+<div class="mb-3">
+    @* TODO: Use @onchange to give RealtorFirm.Logotype value more dynamically?
+    Make the logotype display here after URL is input *@
+    @if (RealtorFirm.Logotype != null)
+    {
+        <img src="@RealtorFirm.Logotype" alt="Logotype for @RealtorFirm.Name" width="200px" />
+    }
+</div>
+
+
+@code {
+    [Parameter]
+    public RealtorFirmPostDTO RealtorFirm { get; set; } = new();
+
+}

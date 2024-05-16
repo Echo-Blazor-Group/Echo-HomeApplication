@@ -1,0 +1,45 @@
+﻿@page "/login"
+@using Echo_HomeApplication.Components
+@using Services
+@inject HttpClient httpClient
+@inject IAuthenticationService AuthenticationService
+@inject NavigationManager NavigationManager
+
+
+@{
+    /// <summary>
+    /// Author: Samed Salman
+    /// This page is for login and signup
+    /// </summary>
+}
+
+<PageTitle>Login</PageTitle>
+
+<div class="container">
+    <div class="row justify-content-left">
+        <div class="col-md-4 mb-3">
+            <fieldset disabled="@(expiration is not null)">
+                <LoginForm OnLoginSuccess="HandleLoginSuccess" />
+            </fieldset>
+        </div>
+        <div class="col-md-4 mb-3 offset-md-1">
+            <fieldset>
+                <RealtorCreateForm />
+            </fieldset>
+        </div>
+    </div>
+</div>
+
+
+@code {
+    private DateTime? expiration;
+
+    private void HandleLoginSuccess(DateTime? loginExpiration)
+    {
+        expiration = loginExpiration;
+        if (expiration != null)
+        {
+            NavigationManager.NavigateTo("/");
+        }
+    }
+}

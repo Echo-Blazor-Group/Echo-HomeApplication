@@ -1,0 +1,56 @@
+﻿@using Services
+@inject IAuthenticationService AuthenticationService
+@inject NavigationManager NavigationManager
+
+@{
+    ///<summary>
+    /// Author: Samed
+    /// This component contains the login form and its belonging logic with an eventcallback to the LoginSignup page
+    ///</summary>
+}
+
+<EditForm method="post" Model="RealtorLogin" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <h1>Login</h1>
+    <hr />
+    <div class="mb-3">
+        <label for="email" class="form-label">Email: </label>
+        <InputText id="email" @bind-Value="RealtorLogin.Email" class="form-control"></InputText>
+        <ValidationMessage For="() => RealtorLogin.Email" class="text-danger" />
+    </div>
+    <div class="mb-3">
+        <label for="password" class="form-label">Password: </label>
+        <InputText id="password" @bind-Value="RealtorLogin.Password" class="form-control"></InputText>
+        <ValidationMessage For="() => RealtorLogin.Password" class="text-danger" />
+    </div>
+    <div class="mb-3">
+        <Button Type="ButtonType.Submit" Color="ButtonColor.Primary"><Icon Name="IconName.DoorOpen" /> Login</Button>
+    </div>
+    @if (errorMessage is not null)
+    {
+        <p class="text-danger">@errorMessage</p>
+    }
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public EventCallback<DateTime?> OnLoginSuccess { get; set; }
+
+    public RealtorLoginDTO RealtorLogin { get; set; } = new();
+    private string? errorMessage;
+
+    private async Task OnValidSubmit()
+    {
+        try
+        {
+            var expiration = await AuthenticationService.LoginAsync(RealtorLogin);
+            errorMessage = null;
+            await OnLoginSuccess.InvokeAsync(expiration);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+}

@@ -1,0 +1,270 @@
+﻿@page "/realtor/details/"
+@page "/realtor/details/{id}"
+
+@inject HttpClient httpClient
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+<PageTitle>Edit realtor</PageTitle>
+
+<div>
+    @if (Realtor is null || EstatesTiedToRealtor is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <h1>Edit @((Realtor.FirstName) + " " + (Realtor.LastName))</h1>
+
+        <div class="row">
+            <div class="col-md-4">
+                <EditForm method="post" Model="RealtorToEdit">
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <div class="mb-3">
+                        <label for="FirstName" class="form-label">First Name: </label>
+                        <InputText id="FirstName" @bind-Value="RealtorToEdit.FirstName" readonly class="form-control readonly" tabindex="-1" />
+                        <ValidationMessage For="() => Realtor.FirstName" class="text-danger" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="LastName" class="form-label">Last Name: </label>
+                        <InputText id="LastName" @bind-Value="RealtorToEdit.LastName" readonly class="form-control readonly" tabindex="-1" />
+                        <ValidationMessage For="() => Realtor.LastName" class="text-danger" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="RealtorFirmName" class="form-label">Realtor Firm: </label>
+                        <input id="RealtorFirmName" value="@Realtor.RealtorFirmName" class="form-control" disabled />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Email" class="form-label">Email: </label>
+                        <InputText id="Email" @bind-Value="RealtorToEdit.Email" class="form-control" />
+                        <ValidationMessage For="() => RealtorToEdit.Email" class="text-danger" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="PhoneNumber" class="form-label">Phone: </label>
+                        <InputText id="PhoneNumber" @bind-Value="RealtorToEdit.PhoneNumber" class="form-control" />
+                        <ValidationMessage For="() => RealtorToEdit.PhoneNumber" class="text-danger" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ProfilePicture" class="form-label">Profile Picture: </label>
+                        <InputText id="ProfilePicture" @bind-Value="RealtorToEdit.ProfilePicture" class="form-control" />
+                        <ValidationMessage For="() => RealtorToEdit.ProfilePicture" class="text-danger" />
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" id="changePassword" class="form-check-input" @onclick="TogglePasswordFields" />
+                        <label class="form-check-label" for="changePassword">Change password?</label>
+                    </div>
+                    @if (changePasswordChecked)
+                    {
+                        <div class="mb-3">
+                            <label for="OldPassword" class="form-label">Current Password: </label>
+                            <InputText id="OldPassword" @bind-Value="RealtorToEdit.OldPassword" class="form-control" />
+                            <ValidationMessage For="() => RealtorToEdit.OldPassword" class="text-danger" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="NewPassword" class="form-label">New Password: </label>
+                            <InputText id="NewPassword" @bind-Value="RealtorToEdit.NewPassword" class="form-control" />
+                            <ValidationMessage For="() => RealtorToEdit.NewPassword" class="text-danger" />
+                        </div>
+                    }
+
+                </EditForm>
+
+            </div>
+            @if (EstatesTiedToRealtor.Any())
+            {
+
+                <div class="col-md-4">
+                    <label for="estatesDropdown" class="form-label">Estates Assigned to You</label>
+                    <select id="estatesDropdown" class="form-select" size="3" @onchange="UpdateSelectedEstateId">
+                        @foreach (var estate in EstatesTiedToRealtor)
+                        {
+                            <option value="@estate.Id">@estate.Address</option>
+                        }
+                    </select>
+                    @if (selectedEstateId is not null)
+                    {
+                        <Button Color="ButtonColor.Secondary" @onclick="RedirectToEstateDetails"> <Icon Name="IconName.ArrowLeftCircle" /> View Estate Details</Button>
+                    }
+                    else
+                    {
+                        <Button Color="ButtonColor.Secondary" @onclick="RedirectToEstateDetails" disabled> <Icon Name="IconName.ArrowLeftCircle" /> View Estate Details</Button>
+                    }
+
+                </div>
+                <div class="col-md-4">
+                    <img src="@RealtorToEdit.ProfilePicture" alt="Add a profile picture!" width="200rem" />
+                </div>
+
+            }
+            else
+            {
+                <div class="col-md-4">
+                    <p>No Estates Assigned to You!</p>
+                </div>
+
+                <div class="col-md-4">
+                    <img src="@RealtorToEdit.ProfilePicture" alt="Add a profile picture!" width="200rem" />
+                </div>
+            }
+
+
+        </div>
+
+
+
+
+    }
+</div>
+<div>
+    <Button Type="ButtonType.Link" To="/realtor" Color="ButtonColor.Secondary"><Icon Name="IconName.ArrowReturnLeft" /> Back</Button>
+    <Button Color="ButtonColor.Success" @onclick="ShowEditConfirmationModalAsync"> <Icon Name="IconName.PencilSquare" /> Save</Button>
+    <Button Color="ButtonColor.Danger" @onclick="ShowDeleteConfirmationModalAsync"> <Icon Name="IconName.Trash" /> Delete</Button>
+</div>
+
+<Modal @ref="confirmationModalEdit" Title="Confirmation">
+    <BodyTemplate>
+        <p>Confirm to save changes.</p>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Success" @onclick="() => EditAsync(RealtorToEdit)">Confirm</Button>
+        <Button Color="ButtonColor.Danger" @onclick="HideEditConfirmationModalAsync">Cancel</Button>
+    </FooterTemplate>
+</Modal>
+
+<Modal @ref="confirmationModalDelete" Title="Confirmation">
+    <BodyTemplate>
+        <p>Choose to remove or deactivate.</p>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Warning" @onclick="() => DeleteOrDeactivateAsync(false)">Deactivate</Button>
+        <Button Color="ButtonColor.Danger" @onclick="() => DeleteOrDeactivateAsync(true)">Remove</Button>
+        <Button Color="ButtonColor.Secondary" @onclick="HideDeleteConfirmationModalAsync">Cancel</Button>
+    </FooterTemplate>
+</Modal>
+
+@code
+{
+    [Inject] protected ToastService ToastService { get; set; } = default!;
+
+    private bool changePasswordChecked = false;
+    private Modal confirmationModalEdit;
+    private Modal confirmationModalDelete;
+
+    [Parameter]
+    public string Id { get; set; }
+
+
+    public RealtorGetDTO Realtor { get; set; }
+
+    [SupplyParameterFromForm]
+    public RealtorEditDTO RealtorToEdit { get; set; } = new();
+
+    public List<Estate>? EstatesTiedToRealtor { get; set; } = null;
+
+    private string? selectedEstateId = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+
+        ToastService.Notify(new(ToastType.Success, $"Page loaded successfully!"));
+        Realtor = await httpClient.GetFromJsonAsync<RealtorGetDTO>($"https://localhost:7190/api/Realtor/{Id}") ?? throw new
+        NullReferenceException("Failed to fetch Realtor data from the server.");
+
+        RealtorToEdit.FirstName = Realtor.FirstName;
+        RealtorToEdit.LastName = Realtor.LastName;
+        RealtorToEdit.Email = Realtor.Email;
+        RealtorToEdit.PhoneNumber = Realtor.PhoneNumber;
+        RealtorToEdit.ProfilePicture = Realtor.ProfilePicture;
+        RealtorToEdit.OldPassword = string.Empty;
+        RealtorToEdit.NewPassword = string.Empty;
+
+
+        var allEstates = await httpClient.GetFromJsonAsync<List<Estate>?>("https://localhost:7190/api/Estate");
+        if (allEstates is null || !allEstates.Any())
+        {
+            EstatesTiedToRealtor = new List<Estate>();
+        }
+        else
+        {
+            allEstates = allEstates.Where(e => e.Realtor?.Id == Id && e.OnTheMarket == true).ToList();
+
+            if (allEstates.Any())
+            {
+                EstatesTiedToRealtor = allEstates;
+            }
+            else
+            {
+                EstatesTiedToRealtor = new List<Estate>();
+            }
+        }
+    }
+
+    private void TogglePasswordFields()
+    {
+        changePasswordChecked = !changePasswordChecked;
+    }
+
+    private async void EditAsync(RealtorEditDTO realtorToEdit)
+    {
+        var response = await httpClient.PutAsJsonAsync<RealtorEditDTO>($"https://localhost:7190/api/Realtor/{Id}", realtorToEdit);
+        await HideEditConfirmationModalAsync();
+        await Task.Delay(500);
+        NavigationManager.NavigateTo("/realtor");
+
+
+
+
+    }
+
+    private async void DeleteOrDeactivateAsync(bool choice)
+    {
+        await httpClient.DeleteAsync($"https://localhost:7190/api/Realtor/{Id}?Remove={choice}");
+        await HideDeleteConfirmationModalAsync();
+        await Task.Delay(500);
+        NavigationManager.NavigateTo("/realtor");
+    }
+
+    private async Task ShowEditConfirmationModalAsync()
+    {
+        await confirmationModalEdit.ShowAsync();
+    }
+
+    private async Task HideEditConfirmationModalAsync()
+    {
+        await confirmationModalEdit.HideAsync();
+    }
+
+    private async Task ShowDeleteConfirmationModalAsync()
+    {
+        await confirmationModalDelete.ShowAsync();
+    }
+    private async Task HideDeleteConfirmationModalAsync()
+    {
+        await confirmationModalDelete.HideAsync();
+    }
+    private void UpdateSelectedEstateId(ChangeEventArgs e)
+    {
+        if (e?.Value?.ToString() is null || e.Value.ToString() == string.Empty)
+        {
+            selectedEstateId = string.Empty;
+        }
+        else
+        {
+            selectedEstateId = e.Value.ToString();
+        }
+    }
+    private void RedirectToEstateDetails()
+    {
+        if (!string.IsNullOrEmpty(selectedEstateId))
+        {
+            NavigationManager.NavigateTo($"/EstateDetails/{selectedEstateId}");
+        }
+    }
+}
+
+

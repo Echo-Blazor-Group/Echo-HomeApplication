@@ -1,0 +1,73 @@
+﻿@page "/realtorfirms"
+@inject HttpClient httpClient
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+@{
+    /// <summary>
+    /// Author: Samed Salman
+    /// This page lists all Realtor firms
+    /// </summary>
+}
+
+<PageTitle>Realtor firms</PageTitle>
+
+<h1>Realtor firms</h1>
+
+@if (_realtorFirms is null)
+{
+    <p><em>Loading...</em></p>
+}
+
+<div id="create-button">
+    <Button Color="ButtonColor.Primary" @onclick="CreateNewAsync" class="d-flex justify-content-end"><Icon Name="IconName.Clipboard" /> Add new</Button>
+</div>
+
+<QuickGrid Class="table" Items="_realtorFirms" Virtualize="true">
+    <PropertyColumn Property="rf => rf.Id" Title="Id" />
+    <PropertyColumn Property="rf => rf.Name" Title="Name" Sortable="true" />
+    <PropertyColumn Property="rf => rf.Active" Title="Active" Sortable="true" />
+    <PropertyColumn Property="rf => rf.RealtorFirmPresentation" Title="About this firm" />
+    <TemplateColumn Context="realtorFirm" Title="Logotype">
+        <img src="@realtorFirm.Logotype" alt="Logotype for @realtorFirm.Name" width="100px" />
+    </TemplateColumn>
+    <TemplateColumn Context="realtorFirm" Title="Handle">
+        <Button Color="ButtonColor.Primary" @onclick="() => GoToDetailsAsync(realtorFirm.Id)"><Icon Name="IconName.FileText" /> Details</Button>
+    </TemplateColumn>
+</QuickGrid>
+
+
+
+@code {
+    // TODO: (Samed) Position add-button to the right, in line with the other buttons
+    // TODO: (Samed) Add pagination / show more for every five firms on this page
+
+    IQueryable<RealtorFirmWithIdDTO> _realtorFirms;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+
+        List<RealtorFirmWithIdDTO> realtorFirmsFromAPI = await httpClient.GetFromJsonAsync<List<RealtorFirmWithIdDTO>>("https://localhost:7190/api/RealtorFirm");
+
+        if (realtorFirmsFromAPI == null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+        _realtorFirms = realtorFirmsFromAPI.AsQueryable();
+    }
+
+    private async Task GoToDetailsAsync(int id)
+    {
+        if (id == null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+        NavigationManager.NavigateTo($"/realtorfirm/details?id={id}");
+    }
+
+    private async Task CreateNewAsync(MouseEventArgs e)
+    {
+        NavigationManager.NavigateTo("/realtorfirm/create");
+    }
+}

@@ -1,0 +1,292 @@
+﻿@page "/Estates"
+@using DTOs
+@using Models
+@inject HttpClient http
+@inject NavigationManager NavigationManager
+@* @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false)) *@
+
+@*author Gustaf*@
+
+<PageTitle>Estates</PageTitle>
+
+<h2>Estates on the market</h2>
+
+@if (estates.Count == 0)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <QuickGrid Class="table" Items="FilteredEstates.Where(e =>e.OnTheMarket == true)" Pagination="pagination">
+        <PropertyColumn Property="e => e.Address" Title="Adress"></PropertyColumn>
+        <PropertyColumn Property="e => e.StartingPrice" Title="Starting Price" Sortable="true">
+            <ColumnOptions>
+                <p>Min: <input type="range" @bind="minPrice" @bind:event="oninput" min="1" max="6000000" />@minPrice</p>
+                <p>Max: <input type="range" @bind="maxPrice" @bind:event="oninput" min="1" max="6000000" />@maxPrice</p>
+            </ColumnOptions>
+        </PropertyColumn>
+        <PropertyColumn Property="e => e.LivingAreaKvm" Title="LivingArea Kvm" Sortable="true">
+            <ColumnOptions>
+                <p>Min: <input type="range" @bind="minArea" @bind:event="oninput" min="1" max="500" />@minArea</p>
+                <p>Max: <input type="range" @bind="maxArea" @bind:event="oninput" min="1" max="500" />@maxArea</p>
+            </ColumnOptions>
+        </PropertyColumn>
+        <PropertyColumn Property="e => e.NumberOfRooms" Title="Number of rooms" Sortable="true">
+            <ColumnOptions>
+                <p>Min: <input type="range" @bind="minRoom" @bind:event="oninput" min="1" max="25" />@minRoom</p>
+                <p>Max: <input type="range" @bind="maxRoom" @bind:event="oninput" min="1" max="25" />@maxRoom</p>
+            </ColumnOptions>
+        </PropertyColumn>
+        <PropertyColumn Property="e => e.EstateAreaKvm" Title="EstateArea Kvm"></PropertyColumn>
+        <PropertyColumn Property="e => e.ConstructionDate" Title="Construction Date"></PropertyColumn>
+        <PropertyColumn Property="e => e.County.CountyName" Title="County" Sortable="true">
+            <ColumnOptions>
+                <input type="search" @bind="filteredCounty" @bind:event="oninput" placeholder="search location" />
+            </ColumnOptions>
+        </PropertyColumn>
+        <PropertyColumn Property="e => e.Category.EstateCategory" Title="Category" Sortable="true">
+            <ColumnOptions>
+                <input type="search" @bind="filteredCategory" @bind:event="oninput" placeholder="search category" />
+            </ColumnOptions>
+        </PropertyColumn>
+        <PropertyColumn Property="e => e.Realtor.FirstName + e.Realtor.LastName" Title="Realtor">
+            <ColumnOptions>
+                <input type="search" @bind="filteredRealtor" @bind:event="oninput" placeholder="search realtor" />
+            </ColumnOptions>
+        </PropertyColumn>
+        <TemplateColumn Context="estates" Title="Handle">
+            <Button Color="ButtonColor.Primary" @onclick="() => EstateDetails(estates.Id)"><Icon Name="IconName.FileText" /> Details</Button>
+        </TemplateColumn>
+    </QuickGrid>
+    <Paginator State="@pagination"></Paginator>
+
+    <button class="btn btn-primary" @onclick="EstateAdd">Add A New Estate</button>
+    <p></p>
+
+    <h2>Estates off the market</h2>
+    <QuickGrid Class="table" Items="FilteredEstates.Where(e =>e.OnTheMarket == false)" Pagination="paginationOffTheMarket">
+        <PropertyColumn Property="e => e.Address" Title="Adress"></PropertyColumn>
+        <PropertyColumn Property="e => e.StartingPrice" Title="Starting Price" Sortable="true">
+            <ColumnOptions>
+                <p>Min: <input type="range" @bind="minPrice" @bind:event="oninput" min="1" max="6000000" />@minPrice</p>
+                <p>Max: <input type="range" @bind="maxPrice" @bind:event="oninput" min="1" max="6000000" />@maxPrice</p>
+            </ColumnOptions>
+        </PropertyColumn>
+        <PropertyColumn Property="e => e.LivingAreaKvm" Title="LivingArea Kvm" Sortable="true">
+            <ColumnOptions>
+                <p>Min: <input type="range" @bind="minArea" @bind:event="oninput" min="1" max="500" />@minArea</p>
+                <p>Max: <input type="range" @bind="maxArea" @bind:event="oninput" min="1" max="500" />@maxArea</p>
+            </ColumnOptions>
+        </PropertyColumn>
+        <PropertyColumn Property="e => e.NumberOfRooms" Title="Number of rooms" Sortable="true">
+            <ColumnOptions>
+                <p>Min: <input type="range" @bind="minRoom" @bind:event="oninput" min="1" max="25" />@minRoom</p>
+                <p>Max: <input type="range" @bind="maxRoom" @bind:event="oninput" min="1" max="25" />@maxRoom</p>
+            </ColumnOptions>
+        </PropertyColumn>
+        <PropertyColumn Property="e => e.EstateAreaKvm" Title="EstateArea Kvm"></PropertyColumn>
+        <PropertyColumn Property="e => e.ConstructionDate" Title="Construction Date"></PropertyColumn>
+        <PropertyColumn Property="e => e.County.CountyName" Title="County" Sortable="true">
+            <ColumnOptions>
+                <input type="search" @bind="filteredCounty" @bind:event="oninput" placeholder="search location" />
+            </ColumnOptions>
+        </PropertyColumn>
+        <PropertyColumn Property="e => e.Category.EstateCategory" Title="Category" Sortable="true">
+            <ColumnOptions>
+                <input type="search" @bind="filteredCategory" @bind:event="oninput" placeholder="search category" />
+            </ColumnOptions>
+        </PropertyColumn>
+        <PropertyColumn Property="e => e.Realtor.FirstName + e.Realtor.LastName" Title="Realtor">
+            <ColumnOptions>
+                <input type="search" @bind="filteredRealtor" @bind:event="oninput" placeholder="search realtor" />
+            </ColumnOptions>
+        </PropertyColumn>
+        <TemplateColumn Context="estates" Title="Handle">
+            <Button Color="ButtonColor.Primary" @onclick="() => EstateDetails(estates.Id)"><Icon Name="IconName.FileText" /> Details</Button>
+        </TemplateColumn>
+    </QuickGrid>
+    <Paginator State="@paginationOffTheMarket"></Paginator>
+}
+
+@code {
+
+    int minPrice = 1;
+    int maxPrice = 6000000;
+
+    int minRoom = 1;
+    int maxRoom = 25;
+
+    int minArea = 1;
+    int maxArea = 6000;
+
+    string? filteredCounty;
+    string? filteredCategory;
+    string? filteredRealtor;
+    List<Estate> estates = new List<Estate>();
+    List<Category> categories = new List<Category>();
+    List<County> counties = new List<County>();
+    // List<Picture> pictures = new List<Picture>();
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+        
+        var result = await http.GetFromJsonAsync<List<Estate>>("https://localhost:7190/api/Estate");
+        var category = await http.GetFromJsonAsync<List<Category>>("https://localhost:7190/api/Category");
+        var county = await http.GetFromJsonAsync<List<County>>("https://localhost:7190/api/County");
+        // var picture = await http.GetFromJsonAsync<List<Picture>>("https://localhost:7190/api/Pictures");
+
+        if (result is not null) estates = result;
+        if (category is not null) categories = category;
+        if (county is not null) counties = county;
+        // if (picture is not null) pictures = picture;
+    }
+
+    void EstateAdd()
+    {
+        NavigationManager.NavigateTo("EstateAdd");
+    }
+    void EstateEdit(int id)
+    {
+        NavigationManager.NavigateTo($"EstateEdit/{id}");
+    }
+    void EstateDetails(int id)
+    {
+        NavigationManager.NavigateTo($"EstateDetails/{id}");
+    }
+
+    //QuickGrid Filtering 
+    //The above string are in the quickgrid and then set in the if statements it can filter based on any of the added categories.
+    //I could most likely add all the fields but we don't really want to do that right now for simplicitys sake, but it can be done.
+    IQueryable<Estate> FilteredEstates
+    {
+        get
+        {
+            var result = estates.AsQueryable().Where(e => e.StartingPrice >= minPrice && e.StartingPrice <= maxPrice
+             && e.NumberOfRooms >= minRoom && e.NumberOfRooms <= maxRoom
+             && e.LivingAreaKvm >= minArea && e.LivingAreaKvm <= maxArea
+            );
+            if (!string.IsNullOrEmpty(filteredCounty))
+            {
+                result = result.Where(
+                   e => e.County.CountyName.Contains(filteredCounty, StringComparison.CurrentCultureIgnoreCase));
+            }
+            if (!string.IsNullOrEmpty(filteredCategory))
+            {
+                result = result.Where(
+                e => e.Category.EstateCategory.Contains(filteredCategory, StringComparison.CurrentCultureIgnoreCase));
+            }
+            if (!string.IsNullOrEmpty(filteredRealtor))
+            {
+                result = result.Where(e => e.Realtor.FirstName.Contains(filteredRealtor, StringComparison.CurrentCultureIgnoreCase));
+            }
+            return result;
+        }
+    }
+    PaginationState pagination = new PaginationState { ItemsPerPage = 10 };
+    PaginationState paginationOffTheMarket = new PaginationState { ItemsPerPage = 10 };
+
+    // List<RealtorFirm> realtoFirms = new List<RealtorFirm>();
+    // List<Realtor> realtors = new List<Realtor>();
+
+
+}
+
+    @*Need to add null check and fix for when calling objects so that the site will load even if and object is broken. Currently when calling on
+        houses without mäklare or counties or category the site breaks down.
+    *@
+
+ @*    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Address</th>
+                <th>Starting Price</th>
+                <th>Living Area Kvm</th>
+                <th>NumberOfRooms</th>
+                <th>BiAreaKvm</th>
+                <th>EstateAreaKvm</th>
+                <th>MonthlyFee</th>
+                <th>RunningCosts</th>
+                <th>ConstructionDate</th>
+                <th>EstateDescription</th>
+                <th>PublishDate</th>
+                <th>County</th>
+                <th>Category</th>
+                <th>Realtor</th>
+
+            </tr>
+            @foreach (var estate in estates.Where(e => e.OnTheMarket == true))
+            {
+
+                <tr>
+                    <td>@estate.Id</td>
+                    <td>@estate.Address</td>
+                    <td>@estate.StartingPrice</td>
+                    <td>@estate.LivingAreaKvm</td>
+                    <td>@estate.NumberOfRooms</td>
+                    <td>@estate.BiAreaKvm</td>
+                    <td>@estate.EstateAreaKvm</td>
+                    <td>@estate.MonthlyFee</td>
+                    <td>@estate.RunningCosts</td>
+                    <td>@estate.ConstructionDate</td>
+                    <td>@estate.EstateDescription</td>
+                    <td>@estate.PublishDate</td>
+                    <td>@estate?.County?.CountyName</td>
+                    <td>@estate?.Category?.EstateCategory</td>
+                    <td>@estate?.Realtor?.FirstName @estate?.Realtor?.LastName</td>
+
+                    <td><button class="btn btn-primary" @onclick="@(() => EstateEdit(@estate.Id))">Edit</button></td>
+                    <td><button class="btn btn-primary" @onclick="@(() => EstateDetails(@estate.Id))">Details</button></td>
+                </tr>
+            }
+        </thead>
+    </table>
+}
+<button class="btn btn-primary" @onclick="EstateAdd">Add A New Estate</button>
+
+<h3>Estates of the market</h3>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Address</th>
+            <th>Starting Price</th>
+            <th>Living Area Kvm</th>
+            <th>NumberOfRooms</th>
+            <th>BiAreaKvm</th>
+            <th>EstateAreaKvm</th>
+            <th>MonthlyFee</th>
+            <th>RunningCosts</th>
+            <th>ConstructionDate</th>
+            <th>EstateDescription</th>
+            <th>PublishDate</th>
+            <th>County</th>
+            <th>Category</th>
+            <th>Realtor</th>
+        </tr>
+        @foreach (var estate in estates.Where(e => e.OnTheMarket == false))
+        {
+            <tr>
+                <td>@estate.Id</td>
+                <td>@estate.Address</td>
+                <td>@estate.StartingPrice</td>
+                <td>@estate.LivingAreaKvm</td>
+                <td>@estate.NumberOfRooms</td>
+                <td>@estate.BiAreaKvm</td>
+                <td>@estate.EstateAreaKvm</td>
+                <td>@estate.MonthlyFee</td>
+                <td>@estate.RunningCosts</td>
+                <td>@estate.ConstructionDate</td>
+                <td>@estate.EstateDescription</td>
+                <td>@estate.PublishDate</td>
+                <td>@estate?.County?.CountyName</td>
+                <td>@estate?.Category?.EstateCategory</td>
+                <td>@estate?.Realtor?.FirstName @estate?.Realtor?.LastName</td>
+                <td>@estate?.Pictures.</td>
+                <td><button class="btn btn-primary" @onclick="@(() => EstateEdit(@estate.Id))">Edit</button></td>
+                <td><button class="btn btn-primary" @onclick="@(() => EstateDetails(@estate.Id))">Details</button></td>
+            </tr>
+        }
+    </thead>
+</table>
+ *@

@@ -1,0 +1,147 @@
+﻿@page "/realtorfirm/details/"
+@using System.Net
+@inject HttpClient httpClient
+@inject NavigationManager NavigationManager
+@inject ToastService ToastService
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@{
+    /// <summary>
+    /// Author: Samed Salman
+    /// This page shows a single Realtor firm's details and allows user to update or delete.
+    /// </summary>
+}
+
+<PageTitle>Edit realtor firm</PageTitle>
+
+<div>
+    @if (RealtorFirm is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <h1>Edit @RealtorFirm.Name</h1>
+
+        <div class="row">
+            <div class="col-md-4">
+                <EditForm method="post" Model="RealtorFirm">
+                    <DataAnnotationsValidator />
+                    <div class="mb-3">
+                        <label for="id" class="form-label">Id: </label>
+                        <InputNumber id="id" @bind-Value="RealtorFirm.Id" disabled class="form-control" />
+                        <ValidationMessage For="() => RealtorFirm.Id" class="text-danger" />
+                    </div>
+                    <div class="mb-3">
+                        <Switch @bind-Value="RealtorFirm.Active" Label="Currently active" />
+                        <ValidationMessage For="() => RealtorFirm.Active" class="text-danger" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Name: </label>
+                        <InputText id="name" @bind-Value="RealtorFirm.Name" class="form-control" />
+                        <ValidationMessage For="() => RealtorFirm.Name" class="text-danger" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="presentation" class="form-label">About this firm: </label>
+                        <InputText id="presentation" @bind-Value="RealtorFirm.RealtorFirmPresentation" class="form-control" />
+                        <ValidationMessage For="() => RealtorFirm.RealtorFirmPresentation" class="text-danger" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Logotype" class="form-label">Logotype URL: </label>
+                        <InputText id="logotype" @bind-Value="RealtorFirm.Logotype" class="form-control" />
+                        <ValidationMessage For="() => RealtorFirm.Logotype" class="text-danger" />
+                    </div>
+                    <div class="mb-3">
+                        @* TODO: Use @onchange to give RealtorFirm.Logotype value more dynamically?
+                    Make the logotype display here after URL is input *@
+                        @if (RealtorFirm.Logotype != null)
+                        {
+                            <img src="@RealtorFirm.Logotype" alt="Logotype for @RealtorFirm.Name" width="200px" />
+                        }
+                    </div>
+                </EditForm>
+            </div>
+        </div>
+    }
+</div>
+<div>
+    <Button Type="ButtonType.Link" To="/realtorfirms" Color="ButtonColor.Secondary"><Icon Name="IconName.ArrowReturnLeft" /> Cancel</Button>
+    <Button Color="ButtonColor.Success" @onclick="() => EditAsync(RealtorFirm.Id)"><Icon Name="IconName.PencilSquare" /> Edit</Button>
+    <Button Color="ButtonColor.Danger" @onclick="() => DeleteAsync(RealtorFirm.Id)"><Icon Name="IconName.Trash" /> Delete</Button>
+</div>
+
+@code {
+
+    // TODO: (Samed) Add DeActivate()-method and button to this page
+
+    [SupplyParameterFromQuery]
+    public int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    public RealtorFirmWithIdDTO RealtorFirm { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Task.Delay(500);
+        RealtorFirm = await httpClient.GetFromJsonAsync<RealtorFirmWithIdDTO>($"https://localhost:7190/api/RealtorFirm/{Id}");
+
+        if (RealtorFirm is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    private async Task EditAsync(int id)
+    {
+        // TODO: (Samed) add edit confirmation here? "Are you sure..."-popup:
+        // https://demos.blazorbootstrap.com/confirm-dialog
+
+        HttpResponseMessage response = new();
+        
+        try
+        {
+            await httpClient.PutAsJsonAsync<RealtorFirmWithIdDTO>($"https://localhost:7190/api/RealtorFirm/{id}", RealtorFirm);
+            NavigationManager.NavigateTo("/realtorfirms");
+            // (Samed) Send success toast message or Blazor Alert to next page
+        }
+        catch(WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.NotFound)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+        catch (WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.BadRequest)
+        {
+            // (Samed) Show toast message or Blazor Alert - alternativly use blazors built in error page?
+        }
+        catch (WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.InternalServerError)
+        {
+            // (Samed) Show toast message or Blazor Alert - alternativly use blazors built in error page?
+        }
+    }
+
+    private async Task DeleteAsync(int id)
+    {
+        // TODO: (Samed) add delete confirmation here? "Are you sure..."-popup:
+        // https://demos.blazorbootstrap.com/confirm-dialog
+        
+        HttpResponseMessage response = new();
+        try
+        {
+            response = await httpClient.DeleteAsync($@"https://localhost:7190/api/RealtorFirm/{id}");
+            NavigationManager.NavigateTo("/realtorfirms");
+            // (Samed) Send success toast message or Blazor Alert to next page
+        }
+        catch (WebException ex) when (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+        catch (WebException ex) when (response.StatusCode == HttpStatusCode.BadRequest)
+        {
+            // (Samed) Show toast message or Blazor Alert
+            // ToastMessage badRequestMessage = new ToastMessage(ToastType.Danger, $"Realtor firm doesn't exist: {response.StatusCode}.");
+            // ToastService.Notify(badRequestMessage);
+        }
+        catch (WebException ex) when (response.StatusCode == HttpStatusCode.InternalServerError)
+        {
+            // (Samed) Show toast message or Blazor Alert
+        }
+    }
+}

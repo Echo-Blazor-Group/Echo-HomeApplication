@@ -1,0 +1,172 @@
+﻿@page "/EstateAdd"
+@page "/EstateEdit/{id:int}"
+@using DTOs.EstateDtos
+@using Models
+@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+
+@*Author Gustaf not as cool as Sameds page function but it works*@
+@* checking if the navigation is bringing along an Id to se if its going to edit or add an estate*@
+@if (Id == null)
+{
+    <h3>Add Estate</h3>
+}
+else
+{
+    <h3>Edit Estate</h3>
+}
+
+<EditForm Model="_Estate" OnSubmit="HandleSubmit">
+    <div>
+        <label onformchange="address"> Adress </label>
+        <InputText id="Address" @bind-Value="_Estate.Address" class="form-control" />
+    </div>
+    <div>
+        <label onformchange="StartingPrice"> StartingPrice </label>
+        <InputNumber id="StartingPrice" @bind-Value="_Estate.StartingPrice" class="form-control" />
+    </div>
+    <div>
+        <label onformchange="LivingAreaKvm"> LivingAreaKvm </label>
+        <InputNumber id="LivingAreaKvm" @bind-Value="_Estate.LivingAreaKvm" class="form-control" />
+    </div>
+    <div>
+        <label onformchange="NumberOfRooms"> NumberOfRooms </label>
+        <InputNumber id="NumberOfRooms" @bind-Value="_Estate.NumberOfRooms" class="form-control" />
+    </div>
+    <div>
+        <label onformchange="BiAreaKvm"> BiAreaKvm </label>
+        <InputNumber id="BiAreaKvm" @bind-Value="_Estate.BiAreaKvm" class="form-control" />
+    </div>
+    <div>
+        <label onformchange="EstateAreaKvm"> EstateAreaKvm </label>
+        <InputNumber id="EstateAreaKvm" @bind-Value="_Estate.EstateAreaKvm" class="form-control" />
+    </div>
+    <div>
+        <label onformchange="MonthlyFee"> MonthlyFee </label>
+        <InputNumber id="MonthlyFee" @bind-Value="_Estate.MonthlyFee" class="form-control" />
+    </div>
+    <div>
+        <label onformchange="RunningCosts"> RunningCosts </label>
+        <InputNumber id="RunningCosts" @bind-Value="_Estate.RunningCosts" class="form-control" />
+    </div>
+    <div>
+        <label onformchange="ConstructionDate"> ConstructionDate </label>
+        <InputDate id="ConstructionDate" @bind-Value="_Estate.ConstructionDate" class="form-control" />
+    </div>
+    <div>
+        <label onformchange="EstateDescription"> EstateDescription </label>
+        <InputText id="EstateDescription" @bind-Value="_Estate.EstateDescription" class="form-control" />
+    </div>
+    <div>
+        <label onformchange="PublishDate"> PublishDate </label>
+        <InputDate id="PublishDate" @bind-Value="_Estate.PublishDate" class="form-control" />
+    </div>
+    <div>
+        @* The labels contain the Current : texts for testing purposes to se that the correct value is brought along *@
+        <label onformchange="County"> County @* | Current : @selectedCounty?.CountyName  *@</label>
+        <InputSelect id="_Estate.CountyId" @bind-Value="_Estate.CountyId" class="form-control">
+            @foreach (var county in counties)
+            {
+                    <option value="@county.Id" label="@county.CountyName">
+                        @county.Id
+                    </option>
+            }
+        </InputSelect>
+    </div>
+    <div>
+        <label onformchange="Category"> Category@*  | current : @selectedCategory?.EstateCategory *@</label>
+        <InputSelect id="_Estate.CategoryId" @bind-Value="_Estate.CategoryId" class="form-control">
+            @foreach (var category in categories)
+            {
+                    <option value="@category.Id" label="@category.EstateCategory">
+                        @category.Id
+                    </option>  
+            }
+        </InputSelect>
+    </div>
+    <div>
+        <label onformchange="Realtor"> Realtor@*  | current : @selectedRealtor?.FirstName @selectedRealtor?.LastName *@</label>
+        <InputSelect @bind-Value="_Estate.RealtorId" class="form-control">
+            @foreach (var realtor in realtors)
+            {
+                <option label="@realtor.FirstName, @realtor.LastName">
+                    @realtor.Id
+                </option>
+            }
+        </InputSelect>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int? Id { get; set; }
+
+    [SupplyParameterFromForm]
+    public UpdateEstateDto _Estate { get; set; } = new UpdateEstateDto();
+    public EstateDto? _Estate1 { get; set; } = new EstateDto();
+
+    List<Category> categories = new List<Category>();
+    List<County> counties = new List<County>();
+    List<Realtor> realtors = new List<Realtor>();
+
+    public Realtor selectedRealtor;
+    public County selectedCounty;
+    public Category selectedCategory;
+    protected override async Task OnParametersSetAsync()
+    {
+        await Task.Delay(500);
+
+
+        if (Id is not null)
+        {
+
+            var result = await Http.GetFromJsonAsync<UpdateEstateDto>($"https://localhost:7190/api/Estate/{Id}");
+            var result2 = await Http.GetFromJsonAsync<EstateDto>($"https://localhost:7190/api/Estate/{Id}");
+
+            if (result is not null) { _Estate = result; }
+            if (result is not null) { _Estate1 = result2; }
+        }
+
+        var category = await Http.GetFromJsonAsync<List<Category>>("https://localhost:7190/api/Category");
+        var county = await Http.GetFromJsonAsync<List<County>>("https://localhost:7190/api/County");
+        var realtor = await Http.GetFromJsonAsync<List<Realtor>>("https://localhost:7190/api/Realtor");
+        if (category is not null) categories = category;
+        if (county is not null) counties = county;
+        if (realtor is not null) realtors = realtor;
+
+        var currentrealtor = realtors.FirstOrDefault(r => r.Id == _Estate1?.Realtor?.Id);
+        var currentcategory = categories.FirstOrDefault(r => r.Id == _Estate1?.Category?.Id);
+        var currentcounty = counties.FirstOrDefault(r => r.Id == _Estate1?.County?.Id);
+
+        if (currentrealtor is not null) selectedRealtor = currentrealtor;
+        if (currentcounty is not null) selectedCounty = currentcounty;
+        if (currentcategory is not null) selectedCategory = currentcategory;
+
+        //These make sure that the base value of the EditForms input is that of the incomming objects value.
+        //So if the Realtor is Samed then the InputSelect will have automatically selected Samed so that the
+        //user won't have to find the correct realtor everytime they want to change a single field
+        if(Id is not null)
+        {
+            _Estate.CategoryId = _Estate1.Category.Id;
+            _Estate.CountyId = _Estate1.County.Id;
+            _Estate.RealtorId = _Estate1.Realtor.Id;
+        }
+
+    }
+
+    async Task HandleSubmit()
+    {
+
+        if (Id is not null)
+        {
+            var result = await Http.PutAsJsonAsync($"https://localhost:7190/api/Estate/{Id}", _Estate); 
+        }
+        else
+        {
+            var result = await Http.PostAsJsonAsync($"https://localhost:7190/api/Estate/", _Estate);
+        }
+        NavigationManager.NavigateTo("Estates");
+    }
+}

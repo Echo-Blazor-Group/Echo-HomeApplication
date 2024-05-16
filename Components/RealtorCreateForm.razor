@@ -1,0 +1,120 @@
+﻿@using Services
+@inject NavigationManager NavigationManager
+@inject HttpClient HttpClient
+
+
+
+<EditForm Model="Realtor" method="post" OnValidSubmit="ShowCreateConfirmationModalAsync">
+    <DataAnnotationsValidator />
+    <h1>Sign up</h1>
+    <hr />
+    <div class="mb-3">
+        <label for="FirstName" class="form-label">First name: </label>
+        <InputText id="FirstName" @bind-Value="Realtor.FirstName" class="form-control" />
+        <ValidationMessage For="() => Realtor.FirstName" class="text-danger" />
+    </div>
+    <div class="mb-3">
+        <label for="LastName" class="form-label">Last name: </label>
+        <InputText id="LastName" @bind-Value="Realtor.LastName" class="form-control" />
+        <ValidationMessage For="() => Realtor.LastName" class="text-danger" />
+    </div>
+    <div class="mb-3">
+        <label for="Email" class="form-label">Email: </label>
+        <InputText id="Email" @bind-Value="Realtor.Email" class="form-control" />
+        <ValidationMessage For="() => Realtor.Email" class="text-danger" />
+    </div>
+    <div class="mb-3">
+        <label for="PhoneNumber" class="form-label">Phone: </label>
+        <InputText id="PhoneNumber" @bind-Value="Realtor.PhoneNumber" class="form-control" />
+        <ValidationMessage For="() => Realtor.PhoneNumber" class="text-danger" />
+    </div>
+    <div class="mb-3">
+        <label for="ProfilePicture" class="form-label">Profile Picture: </label>
+        <InputText id="ProfilePicture" @bind-Value="Realtor.ProfilePicture" class="form-control" />
+        <ValidationMessage For="() => Realtor.ProfilePicture" class="text-danger" />
+    </div>
+    <div class="mb-3">
+        <label for="RealtorFirmId" class="form-label">Employer: </label>
+        <InputSelect id="RealtorFirmId" @bind-Value="Realtor.RealtorFirmId" class="form-control form-select">
+            <option value="">Select employer</option>
+            @foreach (var firm in realtorFirms)
+            {
+                <option value="@firm.Id">@firm.Name</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => Realtor.RealtorFirmId" class="text-danger" />
+    </div>
+    <div class="mb-3">
+        <label for="Password" class="form-label">Password: </label>
+        <InputText id="Password" @bind-Value="Realtor.Password" class="form-control" />
+        <ValidationMessage For="() => Realtor.Password" class="text-danger" />
+    </div>
+
+    <div class="mb-3">
+        <Button Type="ButtonType.Link" To="/realtor" Color="ButtonColor.Secondary"><Icon Name="IconName.ArrowReturnLeft" /> Back</Button>
+        <Button Type="ButtonType.Submit" Color="ButtonColor.Primary"><Icon Name="IconName.ClipboardPlus" /> Submit</Button>
+    </div>
+</EditForm>
+
+
+
+<Modal @ref="confirmationModalCreate" Title="Confirmation">
+    <BodyTemplate>
+        <p>Confirm to create realtor.</p>
+    </BodyTemplate>
+    <FooterTemplate>
+        <Button Color="ButtonColor.Success" @onclick="() => CreateRealtorAsync(Realtor)">Confirm</Button>
+        <Button Color="ButtonColor.Danger" @onclick="HideCreateConfirmationModalAsync">Cancel</Button>
+    </FooterTemplate>
+</Modal>
+
+@code {
+    public RealtorCreateDTO Realtor { get; set; } = new();
+
+    List<RealtorFirmsForRealtorCreateDTO>? realtorFirms = new List<RealtorFirmsForRealtorCreateDTO>();
+
+    private Modal? confirmationModalCreate;
+
+    [Parameter]
+    public EventCallback<RealtorCreateDTO> OnValidSubmit { get; set; }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        realtorFirms = await HttpClient.GetFromJsonAsync
+                                        <List<RealtorFirmsForRealtorCreateDTO>>
+                                        ("https://localhost:7190/api/RealtorFirm");
+
+        if (!realtorFirms.Any())
+            NavigationManager.NavigateTo("notfound");
+
+        realtorFirms.AsQueryable();
+        realtorFirms = realtorFirms.Where(rf => rf.Active is true).ToList();
+
+    }
+
+    private async Task CreateRealtorAsync(RealtorCreateDTO realtor)
+    {
+        if (realtor is null)
+            NavigationManager.NavigateTo("notfound");
+
+        await HttpClient.PostAsJsonAsync("https://localhost:7190/api/Realtor/register", realtor);
+        await HideCreateConfirmationModalAsync();
+        NavigationManager.NavigateTo("/realtor");
+    }
+    private async Task HideCreateConfirmationModalAsync()
+    {
+        await confirmationModalCreate.HideAsync();
+    }
+
+    private async Task ShowCreateConfirmationModalAsync()
+    {
+        await confirmationModalCreate.ShowAsync();
+    }
+
+    // private async Task HandleValidSubmit()
+    // {
+    //     // Invoke the event callback with the form data
+    //     await OnValidSubmit.InvokeAsync(Realtor);
+    // }
+}
