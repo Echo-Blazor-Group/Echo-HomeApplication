@@ -20,7 +20,7 @@
     </div>
     <div class="mb-3">
         <label for="password" class="form-label">Password: </label>
-        <InputText id="password" @bind-Value="RealtorLogin.Password" class="form-control"></InputText>
+        <InputText id="password" type="password" @bind-Value="RealtorLogin.Password" class="form-control"></InputText>
         <ValidationMessage For="() => RealtorLogin.Password" class="text-danger" />
     </div>
     <div class="mb-3">
