@@ -1,7 +1,7 @@
 ﻿@page "/login"
 @using Echo_HomeApplication.Components
 @using Services
-@inject HttpClient httpClient
+@inject IHttpClientFactory httpClientFactory
 @inject IAuthenticationService AuthenticationService
 @inject NavigationManager NavigationManager
 

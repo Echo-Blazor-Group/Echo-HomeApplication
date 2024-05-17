@@ -1,6 +1,6 @@
 ﻿@page "/realtorfirm/create"
 @using System.Net
-@inject HttpClient httpClient
+@inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @{
@@ -63,7 +63,7 @@
 
         try
         {
-            response = await httpClient.PostAsJsonAsync("https://localhost:7190/api/RealtorFirm", RealtorFirm);
+            response = await httpClientFactory.CreateClient("ServerApi").PostAsJsonAsync("https://localhost:7190/api/RealtorFirm", RealtorFirm);
             // TODO: (Samed) Get Location in Http-response and extract id
             // Redirect to to details page
             // Show success Toast-message or Blazor Alert on next page

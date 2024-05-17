@@ -1,7 +1,7 @@
 ﻿@page "/realtor/details/"
 @page "/realtor/details/{id}"
 
-@inject HttpClient httpClient
+@inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
@@ -172,7 +172,7 @@
     {
 
         ToastService.Notify(new(ToastType.Success, $"Page loaded successfully!"));
-        Realtor = await httpClient.GetFromJsonAsync<RealtorGetDTO>($"https://localhost:7190/api/Realtor/{Id}") ?? throw new
+        Realtor = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<RealtorGetDTO>($"https://localhost:7190/api/Realtor/{Id}") ?? throw new
         NullReferenceException("Failed to fetch Realtor data from the server.");
 
         RealtorToEdit.FirstName = Realtor.FirstName;
@@ -184,7 +184,7 @@
         RealtorToEdit.NewPassword = string.Empty;
 
 
-        var allEstates = await httpClient.GetFromJsonAsync<List<Estate>?>("https://localhost:7190/api/Estate");
+        var allEstates = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<Estate>?>("https://localhost:7190/api/Estate");
         if (allEstates is null || !allEstates.Any())
         {
             EstatesTiedToRealtor = new List<Estate>();
@@ -211,7 +211,7 @@
 
     private async void EditAsync(RealtorEditDTO realtorToEdit)
     {
-        var response = await httpClient.PutAsJsonAsync<RealtorEditDTO>($"https://localhost:7190/api/Realtor/{Id}", realtorToEdit);
+        var response = await httpClientFactory.CreateClient("ServerApi").PutAsJsonAsync<RealtorEditDTO>($"https://localhost:7190/api/Realtor/{Id}", realtorToEdit);
         await HideEditConfirmationModalAsync();
         await Task.Delay(500);
         NavigationManager.NavigateTo("/realtor");
@@ -223,7 +223,7 @@
 
     private async void DeleteOrDeactivateAsync(bool choice)
     {
-        await httpClient.DeleteAsync($"https://localhost:7190/api/Realtor/{Id}?Remove={choice}");
+        await httpClientFactory.CreateClient("ServerApi").DeleteAsync($"https://localhost:7190/api/Realtor/{Id}?Remove={choice}");
         await HideDeleteConfirmationModalAsync();
         await Task.Delay(500);
         NavigationManager.NavigateTo("/realtor");

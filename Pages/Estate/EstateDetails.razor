@@ -4,7 +4,7 @@
 @using System.Net
 @using Newtonsoft.Json
 
-@inject HttpClient http
+@inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
@@ -178,7 +178,7 @@ else
         {
             try
             {
-                var result = await http.GetFromJsonAsync<EstateDto>($"https://localhost:7190/api/Estate/{Id}");
+                var result = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<EstateDto>($"https://localhost:7190/api/Estate/{Id}");
                 if (result is not null)
                 {
                     _Estate = result;
@@ -194,7 +194,7 @@ else
     {
         if (WishToRemoveFromMarket == true)
         {
-            var result = await http.PatchAsJsonAsync($"https://localhost:7190/api/Estate/{Id}", _Estate);
+            var result = await httpClientFactory.CreateClient("ServerApi").PatchAsJsonAsync($"https://localhost:7190/api/Estate/{Id}", _Estate);
             NavigationManager.NavigateTo("Estates");
         }
         else { WishToRemoveFromMarket = false; }
@@ -226,7 +226,7 @@ else
         else
         { 
             PictureId = id;
-            var pictures = await http.GetFromJsonAsync<PictureDto>($"https://localhost:7190/api/Pictures/{PictureId}");
+            var pictures = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<PictureDto>($"https://localhost:7190/api/Pictures/{PictureId}");
             if (pictures is not null)
             {
                 _Picture = pictures;
@@ -238,7 +238,7 @@ else
     {
         if (WishToEditImages == true)
         {
-            var result = await http.PatchAsJsonAsync($"https://localhost:7190/api/Pictures/{PictureId}",
+            var result = await httpClientFactory.CreateClient("ServerApi").PatchAsJsonAsync($"https://localhost:7190/api/Pictures/{PictureId}",
             _Picture);
 
             NavigationManager.NavigateTo($"EstateDetails/{Id}", true);
@@ -253,7 +253,7 @@ else
     }
     async Task AddPicture()
     {
-        var result = await http.PostAsJsonAsync($"https://localhost:7190/api/Pictures", _PictureInsert);
+        var result = await httpClientFactory.CreateClient("ServerApi").PostAsJsonAsync($"https://localhost:7190/api/Pictures", _PictureInsert);
         NavigationManager.NavigateTo($"EstateDetails/{Id}", true);
     }
 
@@ -268,7 +268,7 @@ else
         HttpResponseMessage response = new();
         try
         {
-            var result = await http.DeleteAsync($"https://localhost:7190/api/Pictures/{PictureId}");
+            var result = await httpClientFactory.CreateClient("ServerApi").DeleteAsync($"https://localhost:7190/api/Pictures/{PictureId}");
             NavigationManager.NavigateTo($"EstateDetails/{Id}", true); 
         }
         catch (WebException ex) when (response.StatusCode == HttpStatusCode.NotFound)

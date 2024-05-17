@@ -1,5 +1,5 @@
 ﻿@page "/realtor/create"
-@inject HttpClient httpClient
+@inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
@@ -92,7 +92,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        realtorFirms = await httpClient.GetFromJsonAsync
+        realtorFirms = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync
                                         <List<RealtorFirmsForRealtorCreateDTO>>
                                         ("https://localhost:7190/api/RealtorFirm") 
                                         ?? new();
@@ -110,7 +110,7 @@ else
         if (realtor is null) 
             NavigationManager.NavigateTo("notfound");
 
-        await httpClient.PostAsJsonAsync("https://localhost:7190/api/Realtor/register", realtor);
+        await httpClientFactory.CreateClient("ServerApi").PostAsJsonAsync("https://localhost:7190/api/Realtor/register", realtor);
         await HideCreateConfirmationModalAsync();
         NavigationManager.NavigateTo("/realtor");
     }

@@ -2,7 +2,7 @@
 @page "/EstateEdit/{id:int}"
 @using DTOs.EstateDtos
 @using Models
-@inject HttpClient Http
+@inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
 @* @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false)) *@
 
@@ -127,16 +127,16 @@ else
         if (Id is not null)
         {
 
-            var result = await Http.GetFromJsonAsync<UpdateEstateDto>($"https://localhost:7190/api/Estate/{Id}");
-            var result2 = await Http.GetFromJsonAsync<EstateDto>($"https://localhost:7190/api/Estate/{Id}");
+            var result = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<UpdateEstateDto>($"https://localhost:7190/api/Estate/{Id}");
+            var result2 = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<EstateDto>($"https://localhost:7190/api/Estate/{Id}");
 
             if (result is not null) { _Estate = result; }
             if (result is not null) { _Estate1 = result2; }
         }
 
-        var category = await Http.GetFromJsonAsync<List<Category>>("https://localhost:7190/api/Category");
-        var county = await Http.GetFromJsonAsync<List<County>>("https://localhost:7190/api/County");
-        var realtor = await Http.GetFromJsonAsync<List<Realtor>>("https://localhost:7190/api/Realtor");
+        var category = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<Category>>("https://localhost:7190/api/Category");
+        var county = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<County>>("https://localhost:7190/api/County");
+        var realtor = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<Realtor>>("https://localhost:7190/api/Realtor");
         if (category is not null) categories = category;
         if (county is not null) counties = county;
         if (realtor is not null) realtors = realtor;
@@ -166,11 +166,11 @@ else
 
         if (Id is not null)
         {
-            var result = await Http.PutAsJsonAsync($"https://localhost:7190/api/Estate/{Id}", _Estate); 
+            var result = await httpClientFactory.CreateClient("ServerApi").PutAsJsonAsync($"https://localhost:7190/api/Estate/{Id}", _Estate);
         }
         else
         {
-            var result = await Http.PostAsJsonAsync($"https://localhost:7190/api/Estate/", _Estate);
+            var result = await httpClientFactory.CreateClient("ServerApi").PostAsJsonAsync($"https://localhost:7190/api/Estate/", _Estate);
         }
         NavigationManager.NavigateTo("Estates");
     }

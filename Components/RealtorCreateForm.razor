@@ -1,6 +1,6 @@
 ﻿@using Services
 @inject NavigationManager NavigationManager
-@inject HttpClient HttpClient
+@inject IHttpClientFactory httpClientFactory
 
 
 
@@ -81,7 +81,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        realtorFirms = await HttpClient.GetFromJsonAsync
+        realtorFirms = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync
                                         <List<RealtorFirmsForRealtorCreateDTO>>
                                         ("https://localhost:7190/api/RealtorFirm");
 
@@ -98,7 +98,7 @@
         if (realtor is null)
             NavigationManager.NavigateTo("notfound");
 
-        await HttpClient.PostAsJsonAsync("https://localhost:7190/api/Realtor/register", realtor);
+        await httpClientFactory.CreateClient("ServerApi").PostAsJsonAsync("https://localhost:7190/api/Realtor/register", realtor);
         await HideCreateConfirmationModalAsync();
         NavigationManager.NavigateTo("/realtor");
     }

@@ -18,7 +18,7 @@ namespace Echo_HomeApplication
             builder.RootComponents.Add<HeadOutlet>("head::after");
             
             // Add services to the container.
-            // AuthenticationHandler passes JWT back to API along with HttpClient-requests
+            // AuthenticationHandler passes JWT header back to API along with HttpClient-requests
             builder.Services.AddScoped<AuthenticationHandler>();
 
             builder.Services.AddHttpClient("ServerApi").
