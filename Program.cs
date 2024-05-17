@@ -1,4 +1,5 @@
 using AuthState;
+using Blazored.LocalStorage;
 using Blazored.SessionStorage;
 using Handlers;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -21,7 +22,7 @@ namespace Echo_HomeApplication
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");
-
+            
             // Add services to the container.
             // AuthenticationHandler passes JWT back to API along with HttpClient-requests
             builder.Services.AddScoped<AuthenticationHandler>();
@@ -52,12 +53,12 @@ namespace Echo_HomeApplication
                     BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
                 };
             });
-            
-            
+
             builder.Services.AddScoped<AuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(imp => imp.GetRequiredService<AuthStateProvider>());
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
             builder.Services.AddBlazoredSessionStorageAsSingleton();
+            builder.Services.AddBlazoredLocalStorageAsSingleton();
 
             builder.Services.AddAuthorizationCore();
             builder.Services.AddBlazorBootstrap();
