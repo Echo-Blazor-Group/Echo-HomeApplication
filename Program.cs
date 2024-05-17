@@ -39,20 +39,20 @@ namespace Echo_HomeApplication
             builder.Services.AddWMBSC();
 
             // Configure HttpClient that is used for injection in components
-            builder.Services.AddTransient(sp =>
-            {
-                var handler = new HttpClientHandler();
-                var authHandler = sp.GetService<AuthenticationHandler>()
-                ?? 
-                throw new InvalidOperationException("Failed to resolve the AuthenticationHandler service.");
+            //builder.Services.AddTransient(sp =>
+            //{
+            //    var handler = new HttpClientHandler();
+            //    var authHandler = sp.GetService<AuthenticationHandler>()
+            //    ?? 
+            //    throw new InvalidOperationException("Failed to resolve the AuthenticationHandler service.");
 
-                authHandler.InnerHandler = handler;
+            //    authHandler.InnerHandler = handler;
 
-                return new HttpClient(authHandler)
-                {
-                    BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
-                };
-            });
+            //    return new HttpClient(authHandler)
+            //    {
+            //        BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)
+            //    };
+            //});
 
             builder.Services.AddScoped<AuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(imp => imp.GetRequiredService<AuthStateProvider>());
@@ -63,7 +63,7 @@ namespace Echo_HomeApplication
             builder.Services.AddAuthorizationCore();
             builder.Services.AddBlazorBootstrap();
 
-            builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+            //builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
             await builder.Build().RunAsync();
 

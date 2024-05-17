@@ -1,5 +1,5 @@
 ﻿@page "/realtor"
-@inject HttpClient httpClient
+@inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
@@ -40,7 +40,7 @@ https://localhost:7190/api/Realtor?RealtorFirm=exempel *@
 
     protected override async Task OnInitializedAsync()
     {
-        var realtorsFromApi = await httpClient.GetFromJsonAsync<List<RealtorGetDTO>>("https://localhost:7190/api/Realtor");
+        var realtorsFromApi = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<RealtorGetDTO>>("https://localhost:7190/api/Realtor");
         if (realtorsFromApi == null || realtorsFromApi.Count == 0)
         {
             NavigationManager.NavigateTo("notfound");
