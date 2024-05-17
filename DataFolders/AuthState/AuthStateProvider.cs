@@ -30,7 +30,6 @@ namespace AuthState
 
             if (string.IsNullOrEmpty(checkIfTokenExists))
             {
-                //NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
                 return new AuthenticationState(user);
             }
 
@@ -44,18 +43,17 @@ namespace AuthState
 
 
             var claims = token.Claims;
-            var identity = new ClaimsIdentity(claims);
+            
 
-            user = new ClaimsPrincipal(identity);
+            user = new ClaimsPrincipal(new ClaimsIdentity(claims,"jwt"));
 
-            //NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
             return new AuthenticationState(user);
         }
 
         public async Task LoggedInAsync()
         {
             var claims = await GetClaimsAsync();
-            var user = new ClaimsPrincipal(new ClaimsIdentity(claims));
+            var user = new ClaimsPrincipal(new ClaimsIdentity(claims,"jwt"));
             var authState = Task.FromResult(new AuthenticationState(user));
             NotifyAuthenticationStateChanged(authState);
         }
