@@ -1,6 +1,6 @@
 ﻿@page "/realtorfirm/details/"
 @using System.Net
-@inject HttpClient httpClient
+@inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
 @inject ToastService ToastService
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
@@ -70,8 +70,6 @@
 
 @code {
 
-    // TODO: (Samed) Add DeActivate()-method and button to this page
-
     [SupplyParameterFromQuery]
     public int Id { get; set; }
 
@@ -82,7 +80,7 @@
     protected override async Task OnInitializedAsync()
     {
         await Task.Delay(500);
-        RealtorFirm = await httpClient.GetFromJsonAsync<RealtorFirmWithIdDTO>($"https://localhost:7190/api/RealtorFirm/{Id}");
+        RealtorFirm = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<RealtorFirmWithIdDTO>($"https://localhost:7190/api/RealtorFirm/{Id}");
 
         if (RealtorFirm is null)
         {
@@ -99,7 +97,7 @@
         
         try
         {
-            await httpClient.PutAsJsonAsync<RealtorFirmWithIdDTO>($"https://localhost:7190/api/RealtorFirm/{id}", RealtorFirm);
+            await httpClientFactory.CreateClient("ServerApi").PutAsJsonAsync<RealtorFirmWithIdDTO>($"https://localhost:7190/api/RealtorFirm/{id}", RealtorFirm);
             NavigationManager.NavigateTo("/realtorfirms");
             // (Samed) Send success toast message or Blazor Alert to next page
         }
@@ -125,7 +123,7 @@
         HttpResponseMessage response = new();
         try
         {
-            response = await httpClient.DeleteAsync($@"https://localhost:7190/api/RealtorFirm/{id}");
+            response = await httpClientFactory.CreateClient("ServerApi").DeleteAsync($@"https://localhost:7190/api/RealtorFirm/{id}");
             NavigationManager.NavigateTo("/realtorfirms");
             // (Samed) Send success toast message or Blazor Alert to next page
         }
