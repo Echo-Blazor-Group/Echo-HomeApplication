@@ -1,5 +1,5 @@
 ﻿@page "/realtorfirms"
-@inject HttpClient httpClient
+@inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 
@@ -48,7 +48,7 @@
     {
         await Task.Delay(500);
 
-        List<RealtorFirmWithIdDTO> realtorFirmsFromAPI = await httpClient.GetFromJsonAsync<List<RealtorFirmWithIdDTO>>("https://localhost:7190/api/RealtorFirm");
+        List<RealtorFirmWithIdDTO> realtorFirmsFromAPI = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<RealtorFirmWithIdDTO>>("https://localhost:7190/api/RealtorFirm");
 
         if (realtorFirmsFromAPI == null)
         {

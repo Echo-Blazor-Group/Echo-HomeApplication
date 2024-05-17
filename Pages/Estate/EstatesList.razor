@@ -1,7 +1,7 @@
 ﻿@page "/Estates"
 @using DTOs
 @using Models
-@inject HttpClient http
+@inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
 @* @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false)) *@
 
@@ -130,9 +130,9 @@ else
     {
         await Task.Delay(500);
         
-        var result = await http.GetFromJsonAsync<List<Estate>>("https://localhost:7190/api/Estate");
-        var category = await http.GetFromJsonAsync<List<Category>>("https://localhost:7190/api/Category");
-        var county = await http.GetFromJsonAsync<List<County>>("https://localhost:7190/api/County");
+        var result = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<Estate>>("https://localhost:7190/api/Estate");
+        var category = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<Category>>("https://localhost:7190/api/Category");
+        var county = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<County>>("https://localhost:7190/api/County");
         // var picture = await http.GetFromJsonAsync<List<Picture>>("https://localhost:7190/api/Pictures");
 
         if (result is not null) estates = result;
