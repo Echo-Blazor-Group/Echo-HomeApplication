@@ -33,33 +33,28 @@ namespace AuthState
                 return new AuthenticationState(user);
             }
 
-            string tokenExists = checkIfTokenExists;
-            var token = _tokenHandler.ReadJwtToken(tokenExists);
+            string existingToken = checkIfTokenExists;
+            var token = _tokenHandler.ReadJwtToken(existingToken);
 
             if (token.ValidTo < DateTime.UtcNow)
             {
                 return new AuthenticationState(user);
             }
 
-
             var claims = token.Claims;
-            
-
             user = new ClaimsPrincipal(new ClaimsIdentity(claims,"jwt"));
-
             return new AuthenticationState(user);
         }
 
         public async Task LoggedInAsync()
         {
             var claims = await GetClaimsAsync();
-            var user = new ClaimsPrincipal(new ClaimsIdentity(claims,"jwt"));
+            var user = new ClaimsPrincipal(new ClaimsIdentity(claims,"jwt", nameType: JwtRegisteredClaimNames.GivenName, roleType: "role"));
             var authState = Task.FromResult(new AuthenticationState(user));
             NotifyAuthenticationStateChanged(authState);
         }
         public void LoggedOut()
         {
-            //await _sessionStorageService.RemoveItemAsync(JWT_KEY); jwt has alreaddy been removed in authservice
             var nobody = new ClaimsPrincipal(new ClaimsIdentity());
             var authState = Task.FromResult(new AuthenticationState(nobody));
             NotifyAuthenticationStateChanged(authState);

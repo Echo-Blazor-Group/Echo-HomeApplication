@@ -3,62 +3,34 @@
 <PageTitle>Home</PageTitle>
 
 
-@* <AuthorizeView>
+<AuthorizeView Roles=@SD.SuperAdmin>
+    <h2>Only Superadmins can see this.</h2>
+</AuthorizeView>
 
-    <Authorized Context="first">
+<AuthorizeView Roles=@SD.SuperAdminOrRealtor>
+    <h2>Both superadmins & realtors can see this; this is only AuthorizeView Roles = insertRole</h2>
+</AuthorizeView>
 
-        <AuthorizeView Roles="SuperAdmin">
-            <p>
-                You ARE logged in as superadmin!
-            </p>
-        </AuthorizeView>
+<AuthorizeView Roles="@SD.SuperAdminOrRealtor">
+    <h2>Both superadmins & realtors can see this; this is WITH wrapping; AuthorizeView Roles = "insertRole"</h2>
+</AuthorizeView>
 
-        <AuthorizeView Roles="Realtor">
-            <p>
-                You ARE logged in as realtor!
-            </p>
-        </AuthorizeView>
+<div>
+    <AuthorizeView>
+        <Authorized>
+            <p>Anyone who's logged in sees this</p>
+        </Authorized>
+        <NotAuthorized>
+            <p>Anyone who's NOT logged in sees this</p>
+        </NotAuthorized>
+    </AuthorizeView>
+</div>
 
-    </Authorized>
+<AuthorizeView Roles="@SD.Realtor">
+    <h2>
+        Only Realtors can see this.
+    </h2>
+</AuthorizeView>
 
-    <NotAuthorized>
-        <p>You are NOT logged in!</p>
-    </NotAuthorized>
-
-</AuthorizeView> *@
-
-@* <AuthorizeView>
-    <Authorized Context="authContext">
-        <p>
-            User claims:
-        </p>
-        <ul>
-            @foreach (var claim in authContext.User.Claims)
-            {
-                <li>@claim.Type: @claim.Value</li>
-            }
-        </ul>
-
-        <AuthorizeView Roles="SuperAdmin">
-            <Authorized>
-                <p>
-                    You ARE logged in as superadmin!
-                </p>
-            </Authorized>
-        </AuthorizeView>
-
-        <AuthorizeView Roles="Realtor">
-            <Authorized>
-                <p>
-                    You ARE logged in as realtor!
-                </p>
-            </Authorized>
-        </AuthorizeView>
-    </Authorized>
-
-    <NotAuthorized>
-        <p>You are NOT logged in!</p>
-    </NotAuthorized>
-</AuthorizeView> *@
 
 
