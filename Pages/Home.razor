@@ -1,7 +1,9 @@
 ﻿@page "/"
 
 <PageTitle>Home</PageTitle>
-<AuthorizeView>
+
+
+@* <AuthorizeView>
 
     <Authorized Context="first">
 
@@ -23,7 +25,40 @@
         <p>You are NOT logged in!</p>
     </NotAuthorized>
 
-</AuthorizeView>
+</AuthorizeView> *@
 
+@* <AuthorizeView>
+    <Authorized Context="authContext">
+        <p>
+            User claims:
+        </p>
+        <ul>
+            @foreach (var claim in authContext.User.Claims)
+            {
+                <li>@claim.Type: @claim.Value</li>
+            }
+        </ul>
+
+        <AuthorizeView Roles="SuperAdmin">
+            <Authorized>
+                <p>
+                    You ARE logged in as superadmin!
+                </p>
+            </Authorized>
+        </AuthorizeView>
+
+        <AuthorizeView Roles="Realtor">
+            <Authorized>
+                <p>
+                    You ARE logged in as realtor!
+                </p>
+            </Authorized>
+        </AuthorizeView>
+    </Authorized>
+
+    <NotAuthorized>
+        <p>You are NOT logged in!</p>
+    </NotAuthorized>
+</AuthorizeView> *@
 
 
