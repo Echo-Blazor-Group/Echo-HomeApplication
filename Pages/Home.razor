@@ -3,9 +3,16 @@
 <PageTitle>Home</PageTitle>
 <AuthorizeView>
     <Authorized>
-        <p>You ARE logged in!</p>
+        <p>
+            You ARE logged in! You have these claims: @foreach(var claim in context.User.Claims)
+            {
+                <p>@claim.ToString()</p>
+            }
+        </p>
     </Authorized>
     <NotAuthorized>
-        <p>You are NOT logged in!</p>
+        <p>You are NOT logged in! You have these claims: @(context.User.Claims.ToList().ToString())</p>
     </NotAuthorized>
 </AuthorizeView>
+
+
