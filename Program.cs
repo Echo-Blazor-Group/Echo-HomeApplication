@@ -24,7 +24,7 @@ namespace Echo_HomeApplication
 
             // Add services to the container.
             // AuthenticationHandler passes JWT back to API along with HttpClient-requests
-            builder.Services.AddTransient<AuthenticationHandler>();
+            builder.Services.AddScoped<AuthenticationHandler>();
 
             builder.Services.AddHttpClient("ServerApi").
             ConfigureHttpClient(c => c.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)).AddHttpMessageHandler<AuthenticationHandler>();
@@ -41,7 +41,10 @@ namespace Echo_HomeApplication
             builder.Services.AddTransient(sp =>
             {
                 var handler = new HttpClientHandler();
-                var authHandler = sp.GetService<AuthenticationHandler>();
+                var authHandler = sp.GetService<AuthenticationHandler>()
+                ?? 
+                throw new InvalidOperationException("Failed to resolve the AuthenticationHandler service.");
+
                 authHandler.InnerHandler = handler;
 
                 return new HttpClient(authHandler)
@@ -50,8 +53,10 @@ namespace Echo_HomeApplication
                 };
             });
             
+            
+            builder.Services.AddScoped<AuthStateProvider>();
+            builder.Services.AddScoped<AuthenticationStateProvider>(imp => imp.GetRequiredService<AuthStateProvider>());
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
-            builder.Services.AddScoped<AuthenticationStateProvider, AuthStateProvider>();
             builder.Services.AddBlazoredSessionStorageAsSingleton();
 
             builder.Services.AddAuthorizationCore();
