@@ -1,0 +1,70 @@
+﻿@page "/Activate"
+@using DTOs
+@using Models
+@inject IHttpClientFactory httpClientFactory
+@inject NavigationManager NavigationManager
+@{
+    /// <summary>
+    /// Author: Samed
+    /// This page is for activating new or deactivated realtor accounts and realtor firm accounts.
+    /// </summary>
+}
+
+<PageTitle>Activate</PageTitle>
+
+<h1>Activate inactive users and firms</h1>
+
+@if (Realtors is null)
+{
+    <p><em>Loading...</em></p>
+}
+
+<div id="create-button">
+    <Button Color="ButtonColor.Primary" @onclick="RedirectToCreateNew"><Icon Name="IconName.Clipboard" /> Add new</Button>
+</div>
+
+<QuickGrid Class="table" Items="Realtors">
+    <PropertyColumn Property="r => r.FirstName" Title="First Name" Sortable="true" />
+    <PropertyColumn Property="r => r.LastName" Title="Last Name" Sortable="true" />
+    <PropertyColumn Property="r => r.RealtorFirmName" Title="Firm" Sortable="true" />
+    <PropertyColumn Property="r => r.Email" Title="Email" Sortable="true" />
+    <PropertyColumn Property="r => r.PhoneNumber" Title="Phone" Sortable="true" />
+    @* <PropertyColumn Property="r => r.IsActive" Title="Active" Sortable="true" /> *@
+    <TemplateColumn Title="Active">
+        <Switch checked="@context.IsActive" Label="Currently active" />
+        @* <ValidationMessage For="() => Realtor.IsActive" class="text-danger" /> *@
+    </TemplateColumn>
+    <TemplateColumn Context="realtor">
+        <Button Color="ButtonColor.Primary" @onclick="() => RedirectToDetails(realtor.Id)"><Icon Name="IconName.FileText" /> Details</Button>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    IQueryable<RealtorGetDTO>? Realtors { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var realtorsFromApi = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<RealtorGetDTO>>("https://localhost:7190/api/Realtor");
+        
+        if (realtorsFromApi == null || realtorsFromApi.Count == 0)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+        else
+        {
+            Realtors = realtorsFromApi.AsQueryable().Where(r => r.IsActive == false);
+        }
+    }
+
+    // Se ChatGPT + modifiera nedanstående + skicka till API + uppdatera sida
+    private void OnActiveChanged(RealtorPostDTO realtor, ChangeEventArgs e)
+    {
+        realtor.IsActive = (bool)e.Value;
+        // Optionally, handle additional logic here, such as saving the updated status to the database
+    }
+
+    private void RedirectToDetails(string realtorId) => NavigationManager.NavigateTo($"/realtor/details/{realtorId}");
+
+    private void RedirectToCreateNew() => NavigationManager.NavigateTo("/realtor/create");
+
+}
