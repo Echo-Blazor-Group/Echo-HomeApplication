@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
@@ -24,5 +25,8 @@ namespace DTOs.RealtorDTOs
         public string ProfilePicture { get; set; } = "https://shorturl.at/CJOR3";
         public string? OldPassword { get; set; }
         public string? NewPassword { get; set; }
+        [Required]
+        [DisplayName("Active")]
+        public bool IsActive { get; set; } = false;
     }
 }

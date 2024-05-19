@@ -1,5 +1,6 @@
 ﻿@page "/Activate"
 @using DTOs
+@using DataFolders.DTOs.RealtorFirmDTOs
 @using Models
 @inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
@@ -20,7 +21,7 @@
 }
 
 <div id="create-button">
-    <Button Color="ButtonColor.Primary" @onclick="RedirectToCreateNew"><Icon Name="IconName.Clipboard" /> Add new</Button>
+    <Button Color="ButtonColor.Primary" @onclick="RedirectToCreateNewRealtor"><Icon Name="IconName.Clipboard" /> Add new</Button>
 </div>
 
 <QuickGrid Class="table" Items="Realtors">
@@ -30,41 +31,98 @@
     <PropertyColumn Property="r => r.Email" Title="Email" Sortable="true" />
     <PropertyColumn Property="r => r.PhoneNumber" Title="Phone" Sortable="true" />
     @* <PropertyColumn Property="r => r.IsActive" Title="Active" Sortable="true" /> *@
-    <TemplateColumn Title="Active">
-        <Switch checked="@context.IsActive" Label="Currently active" />
-        @* <ValidationMessage For="() => Realtor.IsActive" class="text-danger" /> *@
+    <TemplateColumn Title="Active" Context="realtor">
+        <Switch id="active" @bind-Value="@realtor.IsActive" @onchange="(e) => OnActiveChanged(realtor, e)" />
     </TemplateColumn>
     <TemplateColumn Context="realtor">
-        <Button Color="ButtonColor.Primary" @onclick="() => RedirectToDetails(realtor.Id)"><Icon Name="IconName.FileText" /> Details</Button>
+        <Button Color="ButtonColor.Primary" @onclick="() => RedirectToRealtorDetails(realtor.Id)"><Icon Name="IconName.FileText" /> Details</Button>
+    </TemplateColumn>
+</QuickGrid>
+<hr />
+<QuickGrid Class="table" Items="RealtorFirms" Virtualize="true">
+    <PropertyColumn Property="rf => rf.Id" Title="Id" />
+    <PropertyColumn Property="rf => rf.Name" Title="Name" Sortable="true" />
+    <PropertyColumn Property="rf => rf.RealtorFirmPresentation" Title="About this firm" />
+    <TemplateColumn Context="realtorFirm" Title="Logotype">
+        <img src="@realtorFirm.Logotype" alt="Logotype for @realtorFirm.Name" width="100px" />
+    </TemplateColumn>
+    <TemplateColumn Context="realtorFirm" Title="Active">
+        <Switch id="active" @bind-Value="@realtorFirm.Active" @onchange="(e) => OnActiveChanged(realtorFirm, e)" />
+    </TemplateColumn>
+    <TemplateColumn Context="realtorFirm" Title="Handle">
+        <Button Color="ButtonColor.Primary" @onclick="() => RedirectToRealtorFirmDetails(realtorFirm.Id)"><Icon Name="IconName.FileText" /> Details</Button>
     </TemplateColumn>
 </QuickGrid>
 
 @code {
     IQueryable<RealtorGetDTO>? Realtors { get; set; }
+    IQueryable<RealtorFirmWithIdDTO>? RealtorFirms { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        var realtorsFromApi = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<RealtorGetDTO>>("https://localhost:7190/api/Realtor");
-        
+        Realtors = await GetInactiveRealtorsAsync();
+
+        RealtorFirms = await GetInactiveRealtorFirmsAsync();
+    }
+
+    // Change value when checkbox/Switch is changed
+    private void OnActiveChanged(RealtorGetDTO realtor, ChangeEventArgs e)
+    {
+        realtor.IsActive = (bool)e.Value;
+    }
+
+    // Change value when checkbox/Switch is changed
+    private void OnActiveChanged(RealtorFirmWithIdDTO realtorFirm, ChangeEventArgs e)
+    {
+        realtorFirm.Active = (bool)e.Value;
+    }
+
+    private void SaveActivations()
+    {
+        foreach (var realtor in Realtors.Where(r => r.IsActive == true))
+        {
+            httpClientFactory.CreateClient("ServerApi").PutAsJsonAsync<RealtorGetDTO>($"https://localhost:7190/api/RealtorFirm/{realtor.Id}", realtor);
+        }
+
+        foreach (var realtorFirm in RealtorFirms.Where(r => r.Active == true))
+        {
+            httpClientFactory.CreateClient("ServerApi").PutAsJsonAsync<RealtorFirmWithIdDTO>($"https://localhost:7190/api/RealtorFirm/{realtorFirm.Id}", realtorFirm);
+        }
+
+        NavigationManager.NavigateTo("/");
+    }
+
+    private void RedirectToRealtorDetails(string realtorId) => NavigationManager.NavigateTo($"/realtor/details/{realtorId}");
+
+    private void RedirectToCreateNewRealtor() => NavigationManager.NavigateTo("/realtor/create");
+
+    private void RedirectToRealtorFirmDetails(int realtorFirmId) => NavigationManager.NavigateTo($"/realtorfirm/details/{realtorFirmId}");
+
+
+
+    private async Task<List<RealtorGetDTO>> GetInactiveRealtorsAsync()
+    {
+        List<RealtorGetDTO> realtors;
+        var realtorsFromApi = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<RealtorGetDTO>?>("https://localhost:7190/api/Realtor");
+
         if (realtorsFromApi == null || realtorsFromApi.Count == 0)
         {
             NavigationManager.NavigateTo("notfound");
         }
-        else
-        {
-            Realtors = realtorsFromApi.AsQueryable().Where(r => r.IsActive == false);
-        }
+        realtors = realtorsFromApi.Where(r => r.IsActive == false).ToList();
+        return realtors;
     }
 
-    // Se ChatGPT + modifiera nedanstående + skicka till API + uppdatera sida
-    private void OnActiveChanged(RealtorPostDTO realtor, ChangeEventArgs e)
+    private async Task<List<RealtorFirmWithIdDTO>> GetInactiveRealtorFirmsAsync()
     {
-        realtor.IsActive = (bool)e.Value;
-        // Optionally, handle additional logic here, such as saving the updated status to the database
+        List<RealtorFirmWithIdDTO> realtorFirms;
+        var realtorFirmsFromApi = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<RealtorFirmWithIdDTO>>("https://localhost:7190/api/Realtor");
+
+        if (realtorFirmsFromApi == null || realtorFirmsFromApi.Count == 0)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+        realtorFirms = realtorFirmsFromApi.Where(r => r.Active == false).ToList();
+        return realtorFirms;
     }
-
-    private void RedirectToDetails(string realtorId) => NavigationManager.NavigateTo($"/realtor/details/{realtorId}");
-
-    private void RedirectToCreateNew() => NavigationManager.NavigateTo("/realtor/create");
-
 }
