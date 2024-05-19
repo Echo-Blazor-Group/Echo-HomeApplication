@@ -57,11 +57,11 @@
     }
 
     // Se ChatGPT + modifiera nedanstående + skicka till API + uppdatera sida
-    private void OnActiveChanged(RealtorPostDTO realtor, ChangeEventArgs e)
-    {
-        realtor.IsActive = (bool)e.Value;
-        // Optionally, handle additional logic here, such as saving the updated status to the database
-    }
+    // private void OnActiveChanged(RealtorPostDTO realtor, ChangeEventArgs e)
+    // {
+    //     realtor.IsActive = (bool)e.Value;
+    //     // Optionally, handle additional logic here, such as saving the updated status to the database
+    // }
 
     private void RedirectToDetails(string realtorId) => NavigationManager.NavigateTo($"/realtor/details/{realtorId}");
 
