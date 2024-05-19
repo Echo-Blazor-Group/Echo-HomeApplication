@@ -1,5 +1,6 @@
 ﻿@page "/Activate"
 @using DTOs
+@using DataFolders.DTOs.RealtorFirmDTOs
 @using Models
 @inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
@@ -12,7 +13,7 @@
 
 <PageTitle>Activate</PageTitle>
 
-<h1>Activate inactive users and firms</h1>
+<h1>Inactive users</h1>
 
 @if (Realtors is null)
 {
@@ -20,51 +21,134 @@
 }
 
 <div id="create-button">
-    <Button Color="ButtonColor.Primary" @onclick="RedirectToCreateNew"><Icon Name="IconName.Clipboard" /> Add new</Button>
+    <Button Color="ButtonColor.Primary" @onclick="RedirectToCreateNewRealtor"><Icon Name="IconName.Clipboard" /> Add new</Button>
 </div>
 
-<QuickGrid Class="table" Items="Realtors">
+<QuickGrid Class="table mb-5" Items="Realtors">
     <PropertyColumn Property="r => r.FirstName" Title="First Name" Sortable="true" />
     <PropertyColumn Property="r => r.LastName" Title="Last Name" Sortable="true" />
     <PropertyColumn Property="r => r.RealtorFirmName" Title="Firm" Sortable="true" />
     <PropertyColumn Property="r => r.Email" Title="Email" Sortable="true" />
     <PropertyColumn Property="r => r.PhoneNumber" Title="Phone" Sortable="true" />
-    @* <PropertyColumn Property="r => r.IsActive" Title="Active" Sortable="true" /> *@
-    <TemplateColumn Title="Active">
-        <Switch checked="@context.IsActive" Label="Currently active" />
-        @* <ValidationMessage For="() => Realtor.IsActive" class="text-danger" /> *@
+    <TemplateColumn Title="Active" Context="realtor" Sortable="true">
+        <Switch id="active" @bind-Value="@realtor.IsActive" @onchange="(e) => OnActiveRealtorChanged(realtor, e)" />
     </TemplateColumn>
     <TemplateColumn Context="realtor">
-        <Button Color="ButtonColor.Primary" @onclick="() => RedirectToDetails(realtor.Id)"><Icon Name="IconName.FileText" /> Details</Button>
+        <Button Color="ButtonColor.Primary" @onclick="() => RedirectToRealtorDetails(realtor.Id)"><Icon Name="IconName.FileText" /> Details</Button>
     </TemplateColumn>
 </QuickGrid>
+<hr />
+<h1>Inactive firms</h1>
+<div id="create-button">
+    <Button Color="ButtonColor.Primary" @onclick="RedirectToCreateNewRealtorFirm"><Icon Name="IconName.Clipboard" /> Add new</Button>
+</div>
+<QuickGrid Class="table" Items="RealtorFirms" Virtualize="true">
+    <PropertyColumn Property="rf => rf.Name" Title="Name" Sortable="true" />
+    <PropertyColumn Property="rf => rf.RealtorFirmPresentation" Title="About this firm" />
+    <TemplateColumn Context="realtorFirm" Title="Logotype">
+        <img src="@realtorFirm.Logotype" alt="Logotype for @realtorFirm.Name" width="100px" />
+    </TemplateColumn>
+    <PropertyColumn Property="rf => rf.Id" Title="Id" />
+    <TemplateColumn Context="realtorFirm" Title="Active" Sortable="true">
+        <Switch id="active" @bind-Value="@realtorFirm.Active" @onchange="(e) => OnActiveRealtorFirmChanged(realtorFirm, e)" />
+    </TemplateColumn>
+    <TemplateColumn Context="realtorFirm" Title="Handle">
+        <Button Color="ButtonColor.Primary" @onclick="() => RedirectToRealtorFirmDetails(realtorFirm.Id)"><Icon Name="IconName.FileText" /> Details</Button>
+    </TemplateColumn>
+</QuickGrid>
+<div>
+    <Button Type="ButtonType.Link" To="/realtorfirms" Color="ButtonColor.Secondary"><Icon Name="IconName.ArrowReturnLeft" /> Cancel</Button>
+    <Button Color="ButtonColor.Success" @onclick="SaveActivations"><Icon Name="IconName.PencilSquare" /> Save changes</Button>
+</div>
 
 @code {
-    IQueryable<RealtorGetDTO>? Realtors { get; set; }
+    IQueryable<RealtorGetDTO> Realtors { get; set; }
+    IQueryable<RealtorFirmWithIdDTO> RealtorFirms { get; set; } 
 
     protected override async Task OnInitializedAsync()
     {
-        var realtorsFromApi = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<RealtorGetDTO>>("https://localhost:7190/api/Realtor");
-        
+        Realtors = await GetInactiveRealtorsAsync();
+
+        RealtorFirms = await GetInactiveRealtorFirmsAsync();
+    }
+
+    // Change value when checkbox/Switch is changed
+    private void OnActiveRealtorChanged(RealtorGetDTO realtor, ChangeEventArgs e)
+    {
+        if (e.Value is bool isActive)
+        {
+            realtor.IsActive = isActive;
+        }
+    }
+
+    // Change value when checkbox/Switch is changed
+    private void OnActiveRealtorFirmChanged(RealtorFirmWithIdDTO realtorFirm, ChangeEventArgs e)
+    {
+        if (e.Value is bool isActive)
+        {
+            realtorFirm.Active = isActive;
+        }
+    }
+
+    private void SaveActivations()
+    {
+        foreach (var realtor in Realtors)
+        {
+            RealtorEditDTO realtorToEdit = new();
+            realtorToEdit.FirstName = realtor.FirstName;
+            realtorToEdit.LastName = realtor.LastName;
+            realtorToEdit.Email = realtor.Email;
+            realtorToEdit.PhoneNumber = realtor.PhoneNumber;
+            realtorToEdit.ProfilePicture = realtor.ProfilePicture;
+            realtorToEdit.IsActive = realtor.IsActive;
+            realtorToEdit.OldPassword = string.Empty;
+            realtorToEdit.NewPassword = string.Empty;
+
+            httpClientFactory.CreateClient("ServerApi").PutAsJsonAsync<RealtorEditDTO>($"https://localhost:7190/api/Realtor/{realtor.Id}", realtorToEdit);
+        }
+
+        foreach (var realtorFirm in RealtorFirms)
+        {
+            httpClientFactory.CreateClient("ServerApi").PutAsJsonAsync<RealtorFirmWithIdDTO>($"https://localhost:7190/api/RealtorFirm/{realtorFirm.Id}", realtorFirm);
+        }
+
+        StateHasChanged();
+        //NavigationManager.NavigateTo("/activate");
+    }
+
+    private void RedirectToRealtorDetails(string realtorId) => NavigationManager.NavigateTo($"/realtor/details/{realtorId}");
+
+    private void RedirectToCreateNewRealtor() => NavigationManager.NavigateTo("/realtor/create");
+
+    private void RedirectToRealtorFirmDetails(int realtorFirmId) => NavigationManager.NavigateTo($"/realtorfirm/details?id={realtorFirmId}");
+
+    private void RedirectToCreateNewRealtorFirm() => NavigationManager.NavigateTo("/realtorfirm/create");
+
+
+
+    private async Task<IQueryable<RealtorGetDTO>> GetInactiveRealtorsAsync()
+    {
+        List<RealtorGetDTO> realtors;
+        List<RealtorGetDTO> realtorsFromApi = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<RealtorGetDTO>?>("https://localhost:7190/api/Realtor");
+
         if (realtorsFromApi == null || realtorsFromApi.Count == 0)
         {
             NavigationManager.NavigateTo("notfound");
         }
-        else
-        {
-            Realtors = realtorsFromApi.AsQueryable().Where(r => r.IsActive == false);
-        }
+        realtors = realtorsFromApi.ToList();
+        return realtors.AsQueryable();
     }
 
-    // Se ChatGPT + modifiera nedanstående + skicka till API + uppdatera sida
-    // private void OnActiveChanged(RealtorPostDTO realtor, ChangeEventArgs e)
-    // {
-    //     realtor.IsActive = (bool)e.Value;
-    //     // Optionally, handle additional logic here, such as saving the updated status to the database
-    // }
+    private async Task<IQueryable<RealtorFirmWithIdDTO>> GetInactiveRealtorFirmsAsync()
+    {
+        List<RealtorFirmWithIdDTO> realtorFirms;
+        List<RealtorFirmWithIdDTO> realtorFirmsFromApi = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<RealtorFirmWithIdDTO>>("https://localhost:7190/api/RealtorFirm");
 
-    private void RedirectToDetails(string realtorId) => NavigationManager.NavigateTo($"/realtor/details/{realtorId}");
-
-    private void RedirectToCreateNew() => NavigationManager.NavigateTo("/realtor/create");
-
+        if (realtorFirmsFromApi == null || realtorFirmsFromApi.Count == 0)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+        realtorFirms = realtorFirmsFromApi.ToList();
+        return realtorFirms.AsQueryable();
+    }
 }
