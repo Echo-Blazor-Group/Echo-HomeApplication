@@ -7,9 +7,10 @@ using System.Threading.Tasks;
 
 namespace DTOs.RealtorDTOs
 {
+    //Author: Seb
     public class RealtorEditDTO
     {
-        
+       
         public string FirstName { get; set; } = string.Empty;
 
         

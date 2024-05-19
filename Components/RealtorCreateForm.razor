@@ -83,7 +83,8 @@
     {
         realtorFirms = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync
                                         <List<RealtorFirmsForRealtorCreateDTO>>
-                                        ("https://localhost:7190/api/RealtorFirm");
+                                        ("https://localhost:7190/api/RealtorFirm")
+                                        ?? new();
 
         if (!realtorFirms.Any())
             NavigationManager.NavigateTo("notfound");
