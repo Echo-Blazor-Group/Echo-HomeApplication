@@ -7,13 +7,13 @@
 @{
     /// <summary>
     /// Author: Samed
-    /// This page is for activating new or deactivated realtor accounts and realtor firm accounts.
+    /// This page is for activating and deactivating realtor accounts and realtor firms.
     /// </summary>
 }
 
 <PageTitle>Activate</PageTitle>
 
-<h1>Inactive users</h1>
+<h1>User status</h1>
 
 @if (Realtors is null)
 {
@@ -38,7 +38,7 @@
     </TemplateColumn>
 </QuickGrid>
 <hr />
-<h1>Inactive firms</h1>
+<h1>Firm status</h1>
 <div id="create-button">
     <Button Color="ButtonColor.Primary" @onclick="RedirectToCreateNewRealtorFirm"><Icon Name="IconName.Clipboard" /> Add new</Button>
 </div>
@@ -67,9 +67,9 @@
 
     protected override async Task OnInitializedAsync()
     {
-        Realtors = await GetInactiveRealtorsAsync();
+        Realtors = await GetRealtorsAsync();
 
-        RealtorFirms = await GetInactiveRealtorFirmsAsync();
+        RealtorFirms = await GetRealtorFirmsAsync();
     }
 
     // Change value when checkbox/Switch is changed
@@ -82,6 +82,7 @@
     }
 
     // Change value when checkbox/Switch is changed
+    // TODO: (Samed) Make realtors deactivate when firm is deactivated
     private void OnActiveRealtorFirmChanged(RealtorFirmWithIdDTO realtorFirm, ChangeEventArgs e)
     {
         if (e.Value is bool isActive)
@@ -112,8 +113,7 @@
             httpClientFactory.CreateClient("ServerApi").PutAsJsonAsync<RealtorFirmWithIdDTO>($"https://localhost:7190/api/RealtorFirm/{realtorFirm.Id}", realtorFirm);
         }
 
-        StateHasChanged();
-        //NavigationManager.NavigateTo("/activate");
+        NavigationManager.NavigateTo("/activate", forceLoad: true);
     }
 
     private void RedirectToRealtorDetails(string realtorId) => NavigationManager.NavigateTo($"/realtor/details/{realtorId}");
@@ -126,7 +126,7 @@
 
 
 
-    private async Task<IQueryable<RealtorGetDTO>> GetInactiveRealtorsAsync()
+    private async Task<IQueryable<RealtorGetDTO>> GetRealtorsAsync()
     {
         List<RealtorGetDTO> realtors;
         List<RealtorGetDTO> realtorsFromApi = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<RealtorGetDTO>?>("https://localhost:7190/api/Realtor");
@@ -135,11 +135,11 @@
         {
             NavigationManager.NavigateTo("notfound");
         }
-        realtors = realtorsFromApi.ToList();
+        realtors = realtorsFromApi.OrderBy(r => r.IsActive).ToList();
         return realtors.AsQueryable();
     }
 
-    private async Task<IQueryable<RealtorFirmWithIdDTO>> GetInactiveRealtorFirmsAsync()
+    private async Task<IQueryable<RealtorFirmWithIdDTO>> GetRealtorFirmsAsync()
     {
         List<RealtorFirmWithIdDTO> realtorFirms;
         List<RealtorFirmWithIdDTO> realtorFirmsFromApi = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<RealtorFirmWithIdDTO>>("https://localhost:7190/api/RealtorFirm");
@@ -148,7 +148,7 @@
         {
             NavigationManager.NavigateTo("notfound");
         }
-        realtorFirms = realtorFirmsFromApi.ToList();
+        realtorFirms = realtorFirmsFromApi.OrderBy(r => r.Active).ToList();
         return realtorFirms.AsQueryable();
     }
 }
