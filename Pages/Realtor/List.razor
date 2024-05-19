@@ -32,7 +32,7 @@ https://localhost:7190/api/Realtor?RealtorFirm=exempel *@
     <PropertyColumn Property="r => r.PhoneNumber" Title="Phone" Sortable="true" />
     <PropertyColumn Property="r => r.IsActive" Title="Active" Sortable="true" />
         <TemplateColumn Context="realtor">
-        <Button Color= "ButtonColor.Primary" @onclick="() => RedirectToDetails(realtor.Id)"><Icon Name="IconName.FileText" /></Button>
+        <Button Color= "ButtonColor.Primary" @onclick="() => RedirectToDetails(realtor.Id)"><Icon Name="IconName.FileText" /> Details</Button>
         </TemplateColumn>
 </QuickGrid>
 @code
