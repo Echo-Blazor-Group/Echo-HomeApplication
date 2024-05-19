@@ -4,6 +4,8 @@
 @using Models
 @inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
+@attribute [Authorize(Roles=@SD.SuperAdmin)]
+
 @{
     /// <summary>
     /// Author: Samed

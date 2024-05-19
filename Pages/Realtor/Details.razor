@@ -53,7 +53,12 @@
                         <InputText id="ProfilePicture" @bind-Value="RealtorToEdit.ProfilePicture" class="form-control" />
                         <ValidationMessage For="() => RealtorToEdit.ProfilePicture" class="text-danger" />
                     </div>
-
+                    <AuthorizeView Context="Admin" Roles=@SD.SuperAdmin>
+                        <div class="mb-3">
+                            <Switch @bind-Value="RealtorToEdit.IsActive" Label="Currently active" />
+                            <ValidationMessage For="() => RealtorToEdit.IsActive" class="text-danger" />
+                        </div>
+                    </AuthorizeView>
                     <div class="mb-3 form-check">
                         <input type="checkbox" id="changePassword" class="form-check-input" @onclick="TogglePasswordFields" />
                         <label class="form-check-label" for="changePassword">Change password?</label>
@@ -183,6 +188,7 @@
         RealtorToEdit.ProfilePicture = Realtor.ProfilePicture;
         RealtorToEdit.OldPassword = string.Empty;
         RealtorToEdit.NewPassword = string.Empty;
+        RealtorToEdit.IsActive = Realtor.IsActive;
 
 
         var allEstates = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<Estate>?>("https://localhost:7190/api/Estate");
