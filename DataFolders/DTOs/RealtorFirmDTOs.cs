@@ -33,6 +33,8 @@ namespace DTOs
         public bool Active { get; set; }
     }
 
+
+    //Author: Seb
     public class RealtorFirmsForRealtorCreateDTO
     {
         public int Id { get; set; }

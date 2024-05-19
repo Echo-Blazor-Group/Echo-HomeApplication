@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace DTOs.RealtorDTOs
 {
+    //Author: Seb
     public class RealtorGetDTO
     {
         public string Id { get; set; } = string.Empty;
