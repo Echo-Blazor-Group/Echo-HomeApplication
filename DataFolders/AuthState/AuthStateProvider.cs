@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 
 namespace AuthState
 {
+    //Author: Seb
     public class AuthStateProvider : AuthenticationStateProvider
     {
         private readonly ISessionStorageService _sessionStorageService;

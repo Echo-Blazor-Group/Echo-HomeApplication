@@ -37,7 +37,7 @@
     <div class="mb-3">
         <label for="RealtorFirmId" class="form-label">Employer: </label>
         <InputSelect id="RealtorFirmId" @bind-Value="NewRealtor.RealtorFirmId" class="form-control form-select">
-            <option value="">Select employer</option>
+            <option value="" disabled selected hidden>Select employer</option>
             @foreach (var firm in realtorFirms)
             {
                 <option value="@firm.Id">@firm.Name</option>
@@ -84,7 +84,8 @@
     {
         realtorFirms = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync
                                         <List<RealtorFirmsForRealtorCreateDTO>>
-                                        ("https://localhost:7190/api/RealtorFirm");
+                                        ("https://localhost:7190/api/RealtorFirm")
+                                        ?? new();
 
         if (!realtorFirms.Any())
             NavigationManager.NavigateTo("notfound");

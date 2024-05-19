@@ -1,5 +1,7 @@
 ﻿namespace Helper
 {
+
+    //Author: Seb
     public static class SD
     {
         public const string SuperAdmin = "SuperAdmin";
