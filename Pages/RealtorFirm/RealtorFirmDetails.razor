@@ -8,7 +8,7 @@
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @{
     /// <summary>
-    /// Author: Samed Salman
+    /// Author: Samed Salman, Sebastian did the modal-stuff to check if firm has employees before deleting.
     /// This page shows a single Realtor firm's details and allows user to update or delete.
     /// </summary>
 }
@@ -39,17 +39,17 @@ else if (roleFromClaim == @SD.SuperAdmin)
                     <ValidationMessage For="() => RealtorFirm.Active" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="name" class="form-label">Name: </label>
+                    <label for="name" class="form-label">Name </label>
                     <InputText id="name" @bind-Value="RealtorFirm.Name" class="form-control" />
                     <ValidationMessage For="() => RealtorFirm.Name" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="presentation" class="form-label">About this firm: </label>
+                    <label for="presentation" class="form-label">About this firm </label>
                     <InputText id="presentation" @bind-Value="RealtorFirm.RealtorFirmPresentation" class="form-control" />
                     <ValidationMessage For="() => RealtorFirm.RealtorFirmPresentation" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="Logotype" class="form-label">Logotype URL: </label>
+                    <label for="Logotype" class="form-label">Logotype URL </label>
                     <InputText id="logotype" @bind-Value="RealtorFirm.Logotype" class="form-control" />
                     <ValidationMessage For="() => RealtorFirm.Logotype" class="text-danger" />
                 </div>
@@ -67,7 +67,7 @@ else if (roleFromClaim == @SD.SuperAdmin)
     <div>
         <Button Type="ButtonType.Link" To="/realtorfirms" Color="ButtonColor.Secondary"><Icon Name="IconName.ArrowReturnLeft" /> Cancel</Button>
         <Button Color="ButtonColor.Success" @onclick="() => EditAsync(RealtorFirm.Id)"><Icon Name="IconName.PencilSquare" /> Edit</Button>
-        <Button Color="ButtonColor.Danger" @onclick="() => DeleteAsync(RealtorFirm.Id)"><Icon Name="IconName.Trash" /> Delete</Button>
+        <Button Color="ButtonColor.Danger" @onclick="() => ShowDeleteConfirmationModalAsync(RealtorFirm.Id)"><Icon Name="IconName.Trash" /> Delete</Button>
     </div>
 }
 else
@@ -88,17 +88,17 @@ else
                     <ValidationMessage For="() => RealtorFirm.Active" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="name" class="form-label">Name: </label>
+                    <label for="name" class="form-label">Name </label>
                     <InputText id="name" @bind-Value="RealtorFirm.Name" class="form-control" disabled />
                     <ValidationMessage For="() => RealtorFirm.Name" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="presentation" class="form-label">About this firm: </label>
+                    <label for="presentation" class="form-label">About this firm </label>
                     <InputText id="presentation" @bind-Value="RealtorFirm.RealtorFirmPresentation" class="form-control" disabled />
                     <ValidationMessage For="() => RealtorFirm.RealtorFirmPresentation" class="text-danger" />
                 </div>
                 <div class="mb-3">
-                    <label for="Logotype" class="form-label">Logotype URL: </label>
+                    <label for="Logotype" class="form-label">Logotype URL </label>
                     <InputText id="logotype" @bind-Value="RealtorFirm.Logotype" class="form-control" disabled />
                     <ValidationMessage For="() => RealtorFirm.Logotype" class="text-danger" />
                 </div>
@@ -117,6 +117,29 @@ else
         <Button Type="ButtonType.Link" To="/realtorfirms" Color="ButtonColor.Secondary"><Icon Name="IconName.ArrowReturnLeft" /> Cancel</Button>
     </div>
 }
+@if (isFirmEmpty == false)
+{
+    <Modal @ref="confirmationModalDelete" Title="Confirmation">
+        <BodyTemplate>
+            <p>You cannot remove this firm while it still has employees.</p>
+        </BodyTemplate>
+        <FooterTemplate>
+            <Button Color="ButtonColor.Primary" @onclick="HideDeleteConfirmationModalAsync">OK</Button>
+        </FooterTemplate>
+    </Modal>
+}
+else
+{
+    <Modal @ref="confirmationModalDelete" Title="Confirmation">
+        <BodyTemplate>
+            <p>Confirm to remove realtorfirm.</p>
+        </BodyTemplate>
+        <FooterTemplate>
+            <Button Color="ButtonColor.Danger" @onclick="() => DeleteAsync(RealtorFirm.Id)">Delete</Button>
+            <Button Color="ButtonColor.Secondary" @onclick="HideDeleteConfirmationModalAsync">Cancel</Button>
+        </FooterTemplate>
+    </Modal>
+}
 
 
 
@@ -130,6 +153,10 @@ else
 
     ClaimsPrincipal? claimsPrincipalUser;
     string? roleFromClaim;
+
+    private Modal confirmationModalDelete;
+
+    bool isFirmEmpty = true;
 
 
     protected override async Task OnInitializedAsync()
@@ -151,6 +178,7 @@ else
         {
             NavigationManager.NavigateTo("/notfound");
         }
+        await IsFirmEmptyAsync(RealtorFirm!.Id);
     }
 
     private async Task EditAsync(int id)
@@ -188,7 +216,7 @@ else
         HttpResponseMessage response = new();
         try
         {
-            response = await httpClientFactory.CreateClient("ServerApi").DeleteAsync($@"https://localhost:7190/api/RealtorFirm/{id}");
+            response = await httpClientFactory.CreateClient("ServerApi").DeleteAsync($"https://localhost:7190/api/RealtorFirm/{id}");
             NavigationManager.NavigateTo("/realtorfirms");
             // (Samed) Send success toast message or Blazor Alert to next page
         }
@@ -206,5 +234,18 @@ else
         {
             // (Samed) Show toast message or Blazor Alert
         }
+    }
+    private async Task ShowDeleteConfirmationModalAsync(int realtorFirmId)
+    {
+        await confirmationModalDelete.ShowAsync();
+    }
+    private async Task HideDeleteConfirmationModalAsync()
+    {
+        await confirmationModalDelete.HideAsync();
+    }
+    private async Task<bool> IsFirmEmptyAsync(int realtorFirmId)
+    {
+        isFirmEmpty = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<bool>($"https://localhost:7190/api/RealtorFirm/IsFirmEmpty/{realtorFirmId}");
+        return isFirmEmpty;
     }
 }

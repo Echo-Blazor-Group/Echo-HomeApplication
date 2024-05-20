@@ -10,32 +10,32 @@
     <h1>Sign up</h1>
     <hr />
     <div class="mb-3">
-        <label for="FirstName" class="form-label">First name: </label>
+        <label for="FirstName" class="form-label">First name </label>
         <InputText id="FirstName" @bind-Value="NewRealtor.FirstName" class="form-control" />
         <ValidationMessage For="() => NewRealtor.FirstName" class="text-danger" />
     </div>
     <div class="mb-3">
-        <label for="LastName" class="form-label">Last name: </label>
+        <label for="LastName" class="form-label">Last name </label>
         <InputText id="LastName" @bind-Value="NewRealtor.LastName" class="form-control" />
         <ValidationMessage For="() => NewRealtor.LastName" class="text-danger" />
     </div>
     <div class="mb-3">
-        <label for="Email" class="form-label">Email: </label>
+        <label for="Email" class="form-label">Email </label>
         <InputText id="Email" @bind-Value="NewRealtor.Email" class="form-control" />
         <ValidationMessage For="() => NewRealtor.Email" class="text-danger" />
     </div>
     <div class="mb-3">
-        <label for="PhoneNumber" class="form-label">Phone: </label>
+        <label for="PhoneNumber" class="form-label">Phone </label>
         <InputText id="PhoneNumber" @bind-Value="NewRealtor.PhoneNumber" class="form-control" />
         <ValidationMessage For="() => NewRealtor.PhoneNumber" class="text-danger" />
     </div>
     <div class="mb-3">
-        <label for="ProfilePicture" class="form-label">Profile Picture: </label>
+        <label for="ProfilePicture" class="form-label">Profile Picture </label>
         <InputText id="ProfilePicture" @bind-Value="NewRealtor.ProfilePicture" class="form-control" />
         <ValidationMessage For="() => NewRealtor.ProfilePicture" class="text-danger" />
     </div>
     <div class="mb-3">
-        <label for="RealtorFirmId" class="form-label">Employer: </label>
+        <label for="RealtorFirmId" class="form-label">Employer </label>
         <InputSelect id="RealtorFirmId" @bind-Value="NewRealtor.RealtorFirmId" class="form-control form-select">
             <option value="" disabled selected hidden>Select employer</option>
             @foreach (var firm in realtorFirms)
