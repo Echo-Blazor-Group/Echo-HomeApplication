@@ -25,9 +25,15 @@ namespace Echo_HomeApplication
             ConfigureHttpClient(c => c.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)).AddHttpMessageHandler<AuthenticationHandler>();
 
             builder.Services.AddWMBSC();
-            builder.Services.AddScoped<AuthStateProvider>();
-            builder.Services.AddScoped<AuthenticationStateProvider>(imp => imp.GetRequiredService<AuthStateProvider>());
-            builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+            builder.Services.AddSingleton<AuthStateProvider>();
+            builder.Services.AddSingleton<AuthenticationStateProvider>(imp => imp.GetRequiredService<AuthStateProvider>());
+            builder.Services.AddSingleton<IAuthenticationService, AuthenticationService>();
+          
+            // builder.Services.AddScoped<AuthStateProvider>();
+            // builder.Services.AddScoped<AuthenticationStateProvider>(imp => imp.GetRequiredService<AuthStateProvider>());
+            // builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
             builder.Services.AddBlazoredSessionStorageAsSingleton();
             builder.Services.AddBlazoredLocalStorageAsSingleton();
 
