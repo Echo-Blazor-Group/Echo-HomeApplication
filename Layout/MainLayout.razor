@@ -1,7 +1,9 @@
 ﻿@inherits LayoutComponentBase
 @using DTOs.RealtorDTOs
 @using Echo_HomeApplication.Components
-@inject AuthenticationStateProvider authStateProvider
+@using Services
+@using System.Security.Claims
+@inject NavigationManager NavigationManager
 
 <Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
 
@@ -42,15 +44,47 @@
                         <span class="oi oi-plus" aria-hidden="true"></span> Activate
                     </NavLink>
                 </li>
-                     <UserState /> 
-                @* <li class="nav-item">
-                    <NavLink class="nav-link" href="/">
-                        <span class="oi oi-plus" aria-hidden="true"></span> @emailFromClaim
-                    </NavLink>
-                </li> *@
-                     
-                
-                     
+
+                <AuthorizeView>
+                    <Authorized>
+                        <li class="nav-item">
+                            <NavLink class="nav-link" href="/activate">
+                                <span class="oi oi-plus" aria-hidden="true"></span> @LoggedInUser
+                            </NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <Button Type="ButtonType.Submit" Size="Size.ExtraSmall" Color="ButtonColor.Danger" value="">Logout</Button>
+                        </li>
+                    </Authorized>
+                <NotAuthorized>
+                            <li class="nav-item">
+                                <NavLink class="nav-link" href="/login">
+                                    <span class="oi oi-plus" aria-hidden="true"></span> Login
+                                </NavLink>
+                            </li>
+                </NotAuthorized>
+                </AuthorizeView>
+                     @* <UserState />  *@
+@*                      
+    @if(string.IsNullOrEmpty(EmailFromClaim))
+                {
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="/login">
+                            <span class="oi oi-plus" aria-hidden="true"></span> Login
+                        </NavLink>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item">
+                        <NavLink class="nav-link" href="/activate">
+                            <span class="oi oi-plus" aria-hidden="true"></span> @EmailFromClaim
+                        </NavLink>
+                    </li>
+                    <li class="nav-item">
+                        <Button Type="ButtonType.Submit" Size="Size.ExtraSmall" Color="ButtonColor.Danger" @onclick="LogoutAsync" value="Logout">Logout</Button>
+                    </li>
+                } *@                 
             </ul>
         </div>
     </div>
@@ -63,27 +97,45 @@
     private string? NavBarCssClass => collapseNavMenu ? null : "show";
     private string? NavButtonCssClass => collapseNavMenu ? "collapsed" : null;
 
-    ClaimsPrincipal? claimsPrincipalUser;
-    string? emailFromClaim;
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationStateTask { get; set; }
+    private string LoggedInUser = null;
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        var authState = await authStateProvider.GetAuthenticationStateAsync();
-        claimsPrincipalUser = authState.User;
-        if (claimsPrincipalUser.Identity is not null)
-        {
-            var emailClaim = claimsPrincipalUser.FindFirst(c => c.Type == "email");
-            if (emailClaim is not null)
-            {
-                emailFromClaim = emailClaim.Value;
-            }
-        }
+        var authState = await AuthenticationStateTask;
+        LoggedInUser = authState.User.Identity.Name;
     }
+
+
+
+    // ClaimsPrincipal? claimsPrincipalUser;
+    // public string? EmailFromClaim { get; set; } = null;
+
+    // protected override async Task OnInitializedAsync()
+    // {
+    //     var authState = await authStateProvider.GetAuthenticationStateAsync();
+    //     claimsPrincipalUser = authState.User;
+    //     if (claimsPrincipalUser.Identity is not null)
+    //     {
+    //         var EmailClaim = claimsPrincipalUser.FindFirst(c => c.Type == "email");
+    //         if (EmailClaim is not null)
+    //         {
+    //             EmailFromClaim = EmailClaim.Value;
+    //         }
+    //     }
+    // }
 
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
     }
+
+    // private async Task LogoutAsync()
+    // {
+    //     await AuthenticationService.LogoutAsync();
+    //     NavigationManager.NavigateTo("/");
+    // }
 }
 
 
