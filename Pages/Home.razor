@@ -42,7 +42,7 @@
     @foreach (var estate in estates.Where(e => e.OnTheMarket == true))
     {
         <div class="col-md-4 mt-4">
-            <button @onclick="() => EstateDetails(estate.Id)">
+            <p @onclick="() => EstateDetails(estate.Id)">
                 <Card id="ButtonImage" class="mb-8 card col-md-2 mt-2" Style="width:26rem;">
                     <Card Class="card-img">
                         <img src="@estate.Pictures.FirstOrDefault().PictureUrl" />
@@ -66,9 +66,8 @@
                         </CardText>
                     </CardBody>
                 </Card>
-            </button>
+            </p>
         </div>
-
     }
 </div>
 
