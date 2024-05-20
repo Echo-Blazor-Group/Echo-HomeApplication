@@ -19,13 +19,15 @@
 {
     <p><em>Loading...</em></p>
 }
+<AuthorizeView Roles="@SD.SuperAdminOrRealtor">
+    <div id="create-button">
+        <Button Color="ButtonColor.Primary" @onclick="CreateNewAsync" class="d-flex justify-content-end"><Icon Name="IconName.Clipboard" /> Add new</Button>
+    </div>
+</AuthorizeView>
 
-<div id="create-button">
-    <Button Color="ButtonColor.Primary" @onclick="CreateNewAsync" class="d-flex justify-content-end"><Icon Name="IconName.Clipboard" /> Add new</Button>
-</div>
 
 <QuickGrid Class="table" Items="_realtorFirms" Virtualize="true">
-    <PropertyColumn Property="rf => rf.Id" Title="Id" />
+    @* <PropertyColumn Property="rf => rf.Id" Title="Id" /> *@
     <PropertyColumn Property="rf => rf.Name" Title="Name" Sortable="true" />
     <PropertyColumn Property="rf => rf.Active" Title="Active" Sortable="true" />
     <PropertyColumn Property="rf => rf.RealtorFirmPresentation" Title="About this firm" />
