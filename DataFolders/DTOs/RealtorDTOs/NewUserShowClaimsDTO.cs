@@ -13,6 +13,7 @@ namespace DTOs.RealtorDTOs
         public string? UserName { get; set; }
         public int RealtorFirmId { get; set; }
         public string? Role { get; set; }
+        public string? RealtorId { get; set; }
         public string? Token { get; set; }
     }
 
