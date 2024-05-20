@@ -17,7 +17,7 @@
 {
 <AuthorizeView Roles="@SD.SuperAdminOrRealtor">
     <li class="nav-item">
-        <NavLink class="nav-link" href="/realtor">
+        <NavLink class="nav-link" href="/realtor/details/{userId}">
             <span class="oi oi-plus" aria-hidden="true"></span> @userName
         </NavLink>
     </li>
@@ -40,17 +40,17 @@ else
 @code {
     // Variable to display name
     private string? userName;
+    private string? userId;
     // User is logged in if the LoginChange event holds a name string
     private bool isLoggedIn => userName is not null;
 
     protected override async Task OnInitializedAsync()
     {
-        //await base.OnInitializedAsync();
+        await base.OnInitializedAsync();
         // Get current authentication state, calling built in method
         var authState = await AuthStateProvider.GetAuthenticationStateAsync();
         // Retrieve user
         var user = authState.User;
-
         // Update the userName based on the initial authentication state
         userName = user.Identity?.IsAuthenticated == true ? user.Identity.Name : null;
 
