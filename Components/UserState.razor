@@ -17,11 +17,11 @@
 {
 <AuthorizeView Roles="@SD.SuperAdminOrRealtor">
     <li class="nav-item">
-        <NavLink class="nav-link" href="/realtor/details/{userId}">
+            <NavLink class="nav-link p-2 mt-4 me-2" href="/realtor/details/{userId}">
             <span class="oi oi-plus" aria-hidden="true"></span> @userName
         </NavLink>
     </li>
-    <li class="nav-item">
+        <li class="nav-item p-2 mt-3 me-2">
         <Button Type="ButtonType.Submit" Size="Size.ExtraSmall" Color="ButtonColor.Danger" @onclick="LogoutAsync" value="Logout">Logout</Button>
     </li>
 </AuthorizeView>    
@@ -30,7 +30,7 @@
 else
 {
     <li class="nav-item">
-        <NavLink class="nav-link" href="/login">
+        <NavLink class="nav-link p-2 mt-4 me-2" href="/login">
             <span class="oi oi-plus" aria-hidden="true"></span> Login
         </NavLink>
     </li>
@@ -44,34 +44,20 @@ else
     // User is logged in if the LoginChange event holds a name string
     private bool isLoggedIn => userName is not null;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        await base.OnInitializedAsync();
-        // Get current authentication state, calling built in method
-        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-        // Retrieve user
-        var user = authState.User;
-        // Update the userName based on the initial authentication state
-        userName = user.Identity?.IsAuthenticated == true ? user.Identity.Name : null;
-        // TODO: userId = user.Claims.
+        base.OnInitialized();
 
-        // Subscribe to authentication state changes
-        AuthStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
-
-        // Subscribe to custom login change event
-        AuthenticationService.LoginChange += OnLoginChange;
-    }
-
-    private async void OnAuthenticationStateChanged(Task<AuthenticationState> task)
-    {
-        var authState = await task;
-        var user = authState.User;
-
-        // Update the userName based on the new authentication state
-        userName = user.Identity?.IsAuthenticated == true ? user.Identity.Name : null;
-
-        // Trigger a re-render
-        StateHasChanged();
+        var authState = AuthStateProvider.GetAuthenticationStateAsync();
+        
+        // TODO: Get id from AuthStateProvider.
+        // userId = ;
+        // Subscribe to the LoginChange event in AuthService
+        AuthenticationService.LoginChange += name =>
+        {
+            userName = name;
+            StateHasChanged();
+        };
     }
 
     private void OnLoginChange(string? name)
@@ -84,11 +70,5 @@ else
     {
         await AuthenticationService.LogoutAsync();
         NavigationManager.NavigateTo("/");
-    }
-
-    public void Dispose()
-    {
-        AuthStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
-        AuthenticationService.LoginChange -= OnLoginChange;
     }
 }
