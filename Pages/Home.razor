@@ -6,36 +6,6 @@
 @inject NavigationManager NavigationManager
 <PageTitle>Home</PageTitle>
 
-
-<AuthorizeView Roles=@SD.SuperAdmin>
-    <h2>Only Superadmins can see this.</h2>
-</AuthorizeView>
-
-<AuthorizeView Roles=@SD.SuperAdminOrRealtor>
-    <h2>Both superadmins & realtors can see this; this is only AuthorizeView Roles = insertRole</h2>
-</AuthorizeView>
-
-<AuthorizeView Roles="@SD.SuperAdminOrRealtor">
-    <h2>Both superadmins & realtors can see this; this is WITH wrapping; AuthorizeView Roles = "insertRole"</h2>
-</AuthorizeView>
-
-<div>
-    <AuthorizeView>
-        <Authorized>
-            <p>Anyone who's logged in sees this</p>
-        </Authorized>
-        <NotAuthorized>
-            <p>Anyone who's NOT logged in sees this</p>
-        </NotAuthorized>
-    </AuthorizeView>
-</div>
-
-<AuthorizeView Roles="@SD.Realtor">
-    <h2>
-        Only Realtors can see this.
-    </h2>
-</AuthorizeView>
-
 @if (estates.Count == 0)
 {
     <p>Loading...</p>
