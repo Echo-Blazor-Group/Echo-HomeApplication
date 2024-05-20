@@ -2,14 +2,6 @@
 @page "/realtor"
 @inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
-@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
-
-@* https://localhost:7190/api/Realtor?IsActive=true
-
-https://localhost:7190/api/Realtor?IsActive=false&RealtorFirm=exempel
-
-https://localhost:7190/api/Realtor?RealtorFirm=exempel *@
-
 
 <PageTitle>Realtors</PageTitle>
 
@@ -20,9 +12,14 @@ https://localhost:7190/api/Realtor?RealtorFirm=exempel *@
     <p><em>Loading...</em></p>
 }
 
-<div id="create-button">
-    <Button Color="ButtonColor.Primary" @onclick="RedirectToCreateNew"><Icon Name="IconName.Clipboard" /> Add new</Button>
-</div>
+<AuthorizeView>
+    
+        <div id="create-button">
+            <Button Color="ButtonColor.Primary" @onclick="RedirectToCreateNew"><Icon Name="IconName.Clipboard" /> Add new</Button>
+        </div>
+    
+</AuthorizeView>
+
 
 <QuickGrid Class="table" Items="Realtors">
     <PropertyColumn Property="r => r.FirstName" Title="First Name" Sortable="true" />
@@ -30,10 +27,10 @@ https://localhost:7190/api/Realtor?RealtorFirm=exempel *@
     <PropertyColumn Property="r => r.RealtorFirmName" Title="Firm" Sortable="true" />
     <PropertyColumn Property="r => r.Email" Title="Email" Sortable="true" />
     <PropertyColumn Property="r => r.PhoneNumber" Title="Phone" Sortable="true" />
-    <PropertyColumn Property="r => r.IsActive" Title="Active" Sortable="true" />
-        <TemplateColumn Context="realtor">
-        <Button Color= "ButtonColor.Primary" @onclick="() => RedirectToDetails(realtor.Id)"><Icon Name="IconName.FileText" /> Details</Button>
-        </TemplateColumn>
+
+    <TemplateColumn Context="realtor">
+        <Button Color="ButtonColor.Primary" @onclick="() => RedirectToDetails(realtor.Id)"><Icon Name="IconName.FileText" /> Details</Button>
+    </TemplateColumn>
 </QuickGrid>
 @code
 {
@@ -55,5 +52,5 @@ https://localhost:7190/api/Realtor?RealtorFirm=exempel *@
     private void RedirectToDetails(string realtorId) => NavigationManager.NavigateTo($"/realtor/details/{realtorId}");
 
     private void RedirectToCreateNew() => NavigationManager.NavigateTo("/realtor/create");
-    
+
 }

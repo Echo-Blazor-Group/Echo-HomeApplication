@@ -96,7 +96,7 @@ namespace Services
         }
 
         // Use JWT to retrieve email
-        private static string GetEmail(string token)
+        public static string GetEmail(string token)
         {
             JwtSecurityToken jwt = new JwtSecurityToken(token);
             return jwt.Claims.First(c => c.Type == JwtRegisteredClaimNames.Email).Value;

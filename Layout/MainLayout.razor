@@ -1,6 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @using DTOs.RealtorDTOs
 @using Echo_HomeApplication.Components
+@inject AuthenticationStateProvider authStateProvider
 
 <Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
 
@@ -40,7 +41,15 @@
                         <span class="oi oi-plus" aria-hidden="true"></span> Activate
                     </NavLink>
                 </li>
-                     <UserState /> 
+                     @* <UserState />  *@
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/activate">
+                        <span class="oi oi-plus" aria-hidden="true"></span> @emailFromClaim
+                    </NavLink>
+                </li>
+                     
+                
+                     
             </ul>
         </div>
     </div>
@@ -53,8 +62,21 @@
     private string? NavBarCssClass => collapseNavMenu ? null : "show";
     private string? NavButtonCssClass => collapseNavMenu ? "collapsed" : null;
 
+    ClaimsPrincipal? claimsPrincipalUser;
+    string? emailFromClaim;
+
     protected override async Task OnInitializedAsync()
     {
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        claimsPrincipalUser = authState.User;
+        if (claimsPrincipalUser.Identity is not null)
+        {
+            var emailClaim = claimsPrincipalUser.FindFirst(c => c.Type == "email");
+            if (emailClaim is not null)
+            {
+                emailFromClaim = emailClaim.Value;
+            }
+        }
     }
 
     private void ToggleNavMenu()
