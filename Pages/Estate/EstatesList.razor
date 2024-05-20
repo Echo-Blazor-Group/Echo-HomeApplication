@@ -146,7 +146,6 @@ else
         var category = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<Category>>("https://localhost:7190/api/Category");
         var county = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<County>>("https://localhost:7190/api/County");
 
-
         if (result is not null) estates = result;
         if (category is not null) categories = category;
         if (county is not null) counties = county;
