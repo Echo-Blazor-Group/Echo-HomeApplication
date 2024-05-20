@@ -29,7 +29,8 @@ h1:focus {
 }
 
 .readonly {
-    background-color: #f0f0f0 !important; /* Gray background */
+    background-color: #F0F0F0 !important; /* Gray background */
+    background: #E9ECEF !important;
     pointer-events: none !important; /* Disable pointer events */
     user-select: none !important;
 }

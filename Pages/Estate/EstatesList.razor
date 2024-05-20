@@ -57,7 +57,7 @@ else
                         <input type="search" @bind="filteredRealtor" @bind:event="oninput" placeholder="search realtor" />
                     </ColumnOptions>
                 </PropertyColumn> *@<div class="col-md-1">
-                    <TemplateColumn Context="estates" title="pictures">
+                    <TemplateColumn Context="estates" title="Pictures">
                         <img src="@estates.Pictures.FirstOrDefault().PictureUrl" width="300px" />
                     </TemplateColumn>
                 </div>
@@ -69,8 +69,11 @@ else
     </div>
     <Paginator State="@pagination"></Paginator>
 
-    <button class="btn btn-primary" @onclick="EstateAdd">Add A New Estate</button>
-    <p></p>
+    <AuthorizeView Roles="@SD.SuperAdminOrRealtor">
+        <button class="btn btn-primary" @onclick="EstateAdd">Add A New Estate</button>
+    </AuthorizeView>
+    
+    
 
     <h2>Estates off the market</h2>
     <QuickGrid Class="table" Items="FilteredEstates.Where(e =>e.OnTheMarket == false)" Pagination="paginationOffTheMarket">
