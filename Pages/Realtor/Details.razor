@@ -1,7 +1,6 @@
 ﻿@*Author: Seb*@
 @page "/realtor/details/"
 @page "/realtor/details/{id}"
-@* @attribute [Authorize] *@
 
 @inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
@@ -16,6 +15,7 @@
     }
     else if (emailFromClaim == RealtorToEdit.Email || roleFromClaim == SD.SuperAdmin)
     {
+       
         <h1>Edit @((Realtor.FirstName) + " " + (Realtor.LastName))</h1>
 
         <div class="row">
