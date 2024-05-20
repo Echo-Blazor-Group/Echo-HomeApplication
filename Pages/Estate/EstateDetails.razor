@@ -273,7 +273,7 @@ else
         }
         catch (WebException ex) when (response.StatusCode == HttpStatusCode.NotFound)
         {
-            NavigationManager.NavigateTo("notfound");
+            NavigationManager.NavigateTo("/notfound");
         }
         catch (WebException ex) when (response.StatusCode == HttpStatusCode.BadRequest)
         {

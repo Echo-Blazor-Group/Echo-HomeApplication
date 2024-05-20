@@ -1,0 +1,29 @@
+﻿@*Author: Seb*@
+@page "/Unauthorized"
+<PageTitle>Unauthorized</PageTitle>
+
+
+
+<div class="text-danger">
+
+    <AuthorizeView>
+        <Authorized>
+
+            <h2>
+                You are not authorized to view this content.
+            </h2>
+
+        </Authorized>
+
+        <NotAuthorized>
+
+            <h2>
+                You are not authorized to view this content. Click <a class="text-black" href="/login">here</a> to login.
+            </h2>
+
+        </NotAuthorized>
+
+    </AuthorizeView>
+
+</div>
+

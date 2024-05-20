@@ -44,7 +44,7 @@ https://localhost:7190/api/Realtor?RealtorFirm=exempel *@
         var realtorsFromApi = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<RealtorGetDTO>>("https://localhost:7190/api/Realtor");
         if (realtorsFromApi == null || realtorsFromApi.Count == 0)
         {
-            NavigationManager.NavigateTo("notfound");
+            NavigationManager.NavigateTo("/notfound");
         }
         else
         {

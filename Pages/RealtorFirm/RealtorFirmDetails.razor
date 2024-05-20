@@ -85,7 +85,7 @@
 
         if (RealtorFirm is null)
         {
-            NavigationManager.NavigateTo("notfound");
+            NavigationManager.NavigateTo("/notfound");
         }
     }
 
@@ -104,7 +104,7 @@
         }
         catch(WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.NotFound)
         {
-            NavigationManager.NavigateTo("notfound");
+            NavigationManager.NavigateTo("/notfound");
         }
         catch (WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.BadRequest)
         {
@@ -130,7 +130,7 @@
         }
         catch (WebException ex) when (response.StatusCode == HttpStatusCode.NotFound)
         {
-            NavigationManager.NavigateTo("notfound");
+            NavigationManager.NavigateTo("/notfound");
         }
         catch (WebException ex) when (response.StatusCode == HttpStatusCode.BadRequest)
         {
