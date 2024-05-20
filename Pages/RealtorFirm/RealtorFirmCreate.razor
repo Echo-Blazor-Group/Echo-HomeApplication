@@ -21,17 +21,17 @@
         <DataAnnotationsValidator />
         @* <RealtorFirmEditForm /> TODO: (Samed) Try to make the component work with EventCallBack *@
         <div class="mb-3">
-            <label for="name" class="form-label">Name: </label>
+            <label for="name" class="form-label">Name </label>
             <InputText id="name" @bind-Value="RealtorFirm.Name" class="form-control" />
             <ValidationMessage For="() => RealtorFirm.Name" class="text-danger" />
         </div>
         <div class="mb-3">
-            <label for="presentation" class="form-label">About this firm: </label>
+            <label for="presentation" class="form-label">About this firm </label>
             <InputTextArea id="presentation" @bind-Value="RealtorFirm.RealtorFirmPresentation" class="form-control" />
             <ValidationMessage For="() => RealtorFirm.RealtorFirmPresentation" class="text-danger" />
         </div>
         <div class="mb-3">
-            <label for="Logotype" class="form-label">Logotype URL: </label>
+            <label for="Logotype" class="form-label">Logotype URL </label>
             <InputTextArea id="Logotype" @bind-Value="RealtorFirm.Logotype" class="form-control" />
             <ValidationMessage For="() => RealtorFirm.Logotype" class="text-danger" />
         </div>
