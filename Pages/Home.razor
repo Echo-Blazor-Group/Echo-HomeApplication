@@ -36,45 +36,49 @@
     </h2>
 </AuthorizeView>
 
-
-
-<div class="row">
-    @foreach (var estate in estates.Where(e => e.OnTheMarket == true))
-    {
-        <div class="col-md-4 mt-4">
-            <p @onclick="() => EstateDetails(estate.Id)">
-                <Card id="ButtonImage" class="mb-8 card col-md-2 mt-2" Style="width:26rem;">
-                    <Card Class="card-img">
-                        <img src="@estate.Pictures.FirstOrDefault().PictureUrl" />
+@if (estates.Count == 0)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div class="row">
+        @foreach (var estate in estates.Where(e => e.OnTheMarket == true))
+        {
+            <div class="col-md-4 mt-4">
+                <p @onclick="() => EstateDetails(estate.Id)">
+                    <Card id="ButtonImage" class="mb-8 card col-md-2 mt-2" Style="width:26rem;">
+                        <Card Class="card-img">
+                            <img src="@estate.Pictures.FirstOrDefault().PictureUrl" height="280"/>
+                        </Card>
+                        <CardBody>
+                            <CardTitle>
+                                @estate.Address
+                            </CardTitle>
+                            <CardText>
+                                <div class="tab">
+                                    <div>
+                                        Category: @estate.Category.EstateCategory
+                                    </div>
+                                    <div>
+                                        County: @estate.County.CountyName
+                                    </div>
+                                    <div>
+                                        Price: @estate.StartingPrice kr
+                                    </div>
+                                </div>
+                            </CardText>
+                        </CardBody>
                     </Card>
-                    <CardBody>
-                        <CardTitle>
-                            @estate.Address
-                        </CardTitle>
-                        <CardText>
-                            <div class="tab">
-                                <div>
-                                    Category: @estate.Category.EstateCategory
-                                </div>
-                                <div>
-                                    County: @estate.County.CountyName
-                                </div>
-                                <div>
-                                    Price: @estate.StartingPrice kr
-                                </div>
-                            </div>
-                        </CardText>
-                    </CardBody>
-                </Card>
-            </p>
-        </div>
-    }
-</div>
+                </p>
+            </div>
+        }
+    </div>
+
+}
 
 
 @code {
-
-
     List<EstateDto> estates = new List<EstateDto>();
     List<Category> categories = new List<Category>();
     List<County> counties = new List<County>();

@@ -102,8 +102,7 @@ else
 @if (WishToRemoveFromMarket == true)
 {
     <EditForm Model="_Estate" OnSubmit="RemoveEstateFromMarket">
-        <div>
-
+        <div id="MarketControl">
             <InputCheckbox hidden id="RemoveFromMarket" @bind-Value="_Estate.OnTheMarket" class="form-check" />
         </div>
         @if (_Estate.OnTheMarket == true)
@@ -128,7 +127,7 @@ else
 {
     <td><button Class="btn btn-primary" @onclick="@(() => DeleteAsync(_Picture.Id))">Delete</button></td>
     <EditForm Model="_Picture" OnSubmit="EditImage">
-        <div>
+        <div id="EditImage">
             <label onformchange="PictureUrl"> Url </label>
             <InputText id="PictureUrl" @bind-Value="_Picture.PictureUrl" class="form-control" />
         </div>
@@ -148,7 +147,7 @@ else
     <EditForm Model="_PictureInsert" OnSubmit="AddPicture">
         <DataAnnotationsValidator />
         <ValidationSummary />
-        <div>
+        <div id="AddImage">
             <label onformchange="PictureUrl"> Url </label>
             <InputText id="PictureUrl" @bind-Value="_PictureInsert.PictureUrl" class="form-control" />
         </div>
