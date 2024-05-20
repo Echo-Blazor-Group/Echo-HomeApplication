@@ -115,7 +115,7 @@
             httpClientFactory.CreateClient("ServerApi").PutAsJsonAsync<RealtorFirmWithIdDTO>($"https://localhost:7190/api/RealtorFirm/{realtorFirm.Id}", realtorFirm);
         }
 
-        NavigationManager.NavigateTo("/activate", forceLoad: true);
+        NavigationManager.NavigateTo("/realtor");
     }
 
     private void RedirectToRealtorDetails(string realtorId) => NavigationManager.NavigateTo($"/realtor/details/{realtorId}");

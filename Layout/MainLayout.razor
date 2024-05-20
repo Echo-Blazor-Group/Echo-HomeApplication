@@ -4,12 +4,12 @@
 @using Services
 @using System.Security.Claims
 @inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
 
 <Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
 
-<nav class="navbar navbar-expand-md navbar-dark bg-black mb-4">
+<nav class="navbar navbar-expand-md navbar-dark bg-black mb-4" style="background-color:#293742">
     <div class="container-fluid">
-
         <button class="navbar-toggler @NavButtonCssClass" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse"
                 aria-controls="navbarCollapse" aria-label="Toggle navigation" @onclick="ToggleNavMenu">
             <span class="navbar-toggler-icon"></span>
@@ -17,74 +17,29 @@
         <div class="collapse navbar-collapse @NavBarCssClass" id="navbarCollapse" @onclick="ToggleNavMenu">
             <ul class="navbar-nav me-auto mb-1 mb-md-0">
                 <a href="/">
-                    <img src="Images/Echo_home_logo.png" alt="MainLogo" class="navbar-brand" width="90" height="90">
+                    <img src="Images/Echo_home_logo.png" alt="MainLogo" class="img-fluid" width="100">
                 </a>
-                @* <li class="nav-item">
-                    <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                        <span class="oi oi-home" aria-hidden="true"></span> Home
-                    </NavLink>
-                </li> *@
                 <li class="nav-item">
-                    <NavLink class="nav-link" href="estates">
+                    <NavLink class="nav-link p-2 mt-4 ms-4 me-2" href="estates" >
                         <span class="oi oi-plus" aria-hidden="true"></span> Estates
                     </NavLink>
                 </li>
                 <li class="nav-item">
-                    <NavLink class="nav-link" href="/realtorfirms">
+                    <NavLink class="nav-link p-2 mt-4 me-2" href="/realtorfirms">
                         <span class="oi oi-plus" aria-hidden="true"></span> Realtor firms
                     </NavLink>
                 </li>
                 <li class="nav-item">
-                    <NavLink class="nav-link" href="/realtor">
+                    <NavLink class="nav-link p-2 mt-4 me-2" href="/realtor">
                         <span class="oi oi-plus" aria-hidden="true"></span> Realtors
                     </NavLink>
                 </li>
                 <li class="nav-item">
-                    <NavLink class="nav-link" href="/activate">
+                    <NavLink class="nav-link p-2 mt-4 me-2" href="/activate">
                         <span class="oi oi-plus" aria-hidden="true"></span> Activate
                     </NavLink>
                 </li>
-
-                <AuthorizeView>
-                    <Authorized>
-                        <li class="nav-item">
-                            <NavLink class="nav-link" href="/activate">
-                                <span class="oi oi-plus" aria-hidden="true"></span> @LoggedInUser
-                            </NavLink>
-                        </li>
-                        <li class="nav-item">
-                            <Button Type="ButtonType.Submit" Size="Size.ExtraSmall" Color="ButtonColor.Danger" value="">Logout</Button>
-                        </li>
-                    </Authorized>
-                <NotAuthorized>
-                            <li class="nav-item">
-                                <NavLink class="nav-link" href="/login">
-                                    <span class="oi oi-plus" aria-hidden="true"></span> Login
-                                </NavLink>
-                            </li>
-                </NotAuthorized>
-                </AuthorizeView>
-                     @* <UserState />  *@
-@*                      
-    @if(string.IsNullOrEmpty(EmailFromClaim))
-                {
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href="/login">
-                            <span class="oi oi-plus" aria-hidden="true"></span> Login
-                        </NavLink>
-                    </li>
-                }
-                else
-                {
-                    <li class="nav-item">
-                        <NavLink class="nav-link" href="/activate">
-                            <span class="oi oi-plus" aria-hidden="true"></span> @EmailFromClaim
-                        </NavLink>
-                    </li>
-                    <li class="nav-item">
-                        <Button Type="ButtonType.Submit" Size="Size.ExtraSmall" Color="ButtonColor.Danger" @onclick="LogoutAsync" value="Logout">Logout</Button>
-                    </li>
-                } *@                 
+                     <UserState />
             </ul>
         </div>
     </div>
@@ -97,45 +52,10 @@
     private string? NavBarCssClass => collapseNavMenu ? null : "show";
     private string? NavButtonCssClass => collapseNavMenu ? "collapsed" : null;
 
-    [CascadingParameter]
-    public Task<AuthenticationState> AuthenticationStateTask { get; set; }
-    private string LoggedInUser = null;
-
-    protected override async Task OnParametersSetAsync()
-    {
-        var authState = await AuthenticationStateTask;
-        LoggedInUser = authState.User.Identity.Name;
-    }
-
-
-
-    // ClaimsPrincipal? claimsPrincipalUser;
-    // public string? EmailFromClaim { get; set; } = null;
-
-    // protected override async Task OnInitializedAsync()
-    // {
-    //     var authState = await authStateProvider.GetAuthenticationStateAsync();
-    //     claimsPrincipalUser = authState.User;
-    //     if (claimsPrincipalUser.Identity is not null)
-    //     {
-    //         var EmailClaim = claimsPrincipalUser.FindFirst(c => c.Type == "email");
-    //         if (EmailClaim is not null)
-    //         {
-    //             EmailFromClaim = EmailClaim.Value;
-    //         }
-    //     }
-    // }
-
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
     }
-
-    // private async Task LogoutAsync()
-    // {
-    //     await AuthenticationService.LogoutAsync();
-    //     NavigationManager.NavigateTo("/");
-    // }
 }
 
 
