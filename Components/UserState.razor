@@ -53,6 +53,7 @@ else
         var user = authState.User;
         // Update the userName based on the initial authentication state
         userName = user.Identity?.IsAuthenticated == true ? user.Identity.Name : null;
+        // TODO: userId = user.Claims.
 
         // Subscribe to authentication state changes
         AuthStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
