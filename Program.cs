@@ -16,7 +16,7 @@ namespace Echo_HomeApplication
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
             builder.RootComponents.Add<App>("#app");
             builder.RootComponents.Add<HeadOutlet>("head::after");
-            
+
             // Add services to the container.
             // AuthenticationHandler passes JWT header back to API along with HttpClient-requests
             builder.Services.AddScoped<AuthenticationHandler>();

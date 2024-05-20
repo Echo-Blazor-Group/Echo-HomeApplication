@@ -4,7 +4,7 @@
 @using Models
 @inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
-@* @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false)) *@
+@attribute [Authorize(Roles = SD.SuperAdminOrRealtor)]
 
 @*Author Gustaf not as cool as Sameds page function but it works*@
 @* checking if the navigation is bringing along an Id to se if its going to edit or add an estate*@
@@ -32,7 +32,7 @@ else
     </div>
     <div>
         <label onformchange="NumberOfRooms"> NumberOfRooms </label>
-        <InputSelect id="NumberOfRooms" @bind-Value="_Estate.NumberOfRooms" class="form-control" >
+        <InputSelect id="NumberOfRooms" @bind-Value="_Estate.NumberOfRooms" class="form-control">
             @for (int i = 1; i < 25; i++)
             {
                 <option> @i </option>
@@ -73,9 +73,9 @@ else
         <InputSelect id="_Estate.CountyId" @bind-Value="_Estate.CountyId" class="form-control">
             @foreach (var county in counties)
             {
-                    <option value="@county.Id" label="@county.CountyName">
-                        @county.Id
-                    </option>
+                <option value="@county.Id" label="@county.CountyName">
+                    @county.Id
+                </option>
             }
         </InputSelect>
     </div>
@@ -84,9 +84,9 @@ else
         <InputSelect id="_Estate.CategoryId" @bind-Value="_Estate.CategoryId" class="form-control">
             @foreach (var category in categories)
             {
-                    <option value="@category.Id" label="@category.EstateCategory">
-                        @category.Id
-                    </option>  
+                <option value="@category.Id" label="@category.EstateCategory">
+                    @category.Id
+                </option>
             }
         </InputSelect>
     </div>
@@ -103,6 +103,8 @@ else
     </div>
     <button type="submit" class="btn btn-primary">Save</button>
 </EditForm>
+
+
 
 @code {
     [Parameter]

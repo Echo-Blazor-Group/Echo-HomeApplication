@@ -6,7 +6,8 @@
 
 @inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
-@rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
+@inject AuthenticationStateProvider authStateProvider
+
 
 @*author Gustaf*@
 
@@ -56,28 +57,43 @@ else
                 <td>@_Estate?.County?.CountyName</td>
                 <td>@_Estate?.Category?.EstateCategory</td>
                 <td>@_Estate?.Realtor?.FirstName @_Estate?.Realtor?.LastName</td>
-                <td><button class="btn btn-primary" @onclick="@(() => EstateEdit(@_Estate.Id))">Edit</button></td>
-                @if (_Estate.OnTheMarket == false)
-                {
-                    <td><button class="btn btn-primary" @onclick="@(() => Remove())">Return</button></td>
-                }
-                else
-                {
-                    <td><button class="btn btn-primary" @onclick="@(() => Remove())">Remove</button></td>
-                }
-                <td><button class="btn btn-primary" @onclick="@(() => ShowAddPicture(_Estate.Id))">Add Image</button></td>
+
+                <AuthorizeView Roles="@SD.SuperAdminOrRealtor">
+
+                    @if (idFromClaim == _Estate.Realtor.Id || roleFromClaim == SD.SuperAdmin)
+                    {
+                        <td><button class="btn btn-primary" @onclick="@(() => EstateEdit(@_Estate.Id))">Edit</button></td>
+                        @if (_Estate.OnTheMarket == false)
+                        {
+                            <td><button class="btn btn-primary" @onclick="@(() => Remove())">Return</button></td>
+                        }
+                        else
+                        {
+                            <td><button class="btn btn-primary" @onclick="@(() => Remove())">Remove</button></td>
+                        }
+                        <td><button class="btn btn-primary" @onclick="@(() => ShowAddPicture(_Estate.Id))">Add Image</button></td>
+                    }
+
+                </AuthorizeView>
             </tr>
-            <tr> 
+            <tr>
                 <th>Estate Description</th>
             </tr>
-            
-                <p width="200px">@_Estate.EstateDescription</p>
+
+            <p width="200px">@_Estate.EstateDescription</p>
 
             <tr>
                 @foreach (var picture in _Estate.Pictures)
                 {
                     <img src="@picture.PictureUrl" width="100px" />
-                    <td><button Class="btn btn-primary" @onclick="@(() => ShowEditImages(picture.Id))">Edit Image</button></td>
+
+                    <AuthorizeView Roles="@SD.SuperAdminOrRealtor">
+                        @if (idFromClaim == _Estate.Realtor.Id || roleFromClaim == SD.SuperAdmin)
+                        {
+                            <td><button Class="btn btn-primary" @onclick="@(() => ShowEditImages(picture.Id))">Edit Image</button></td>
+                        }
+
+                    </AuthorizeView>
                 }
             </tr>
         </thead>
@@ -86,8 +102,7 @@ else
 @if (WishToRemoveFromMarket == true)
 {
     <EditForm Model="_Estate" OnSubmit="RemoveEstateFromMarket">
-        <div>
-
+        <div id="MarketControl">
             <InputCheckbox hidden id="RemoveFromMarket" @bind-Value="_Estate.OnTheMarket" class="form-check" />
         </div>
         @if (_Estate.OnTheMarket == true)
@@ -112,12 +127,12 @@ else
 {
     <td><button Class="btn btn-primary" @onclick="@(() => DeleteAsync(_Picture.Id))">Delete</button></td>
     <EditForm Model="_Picture" OnSubmit="EditImage">
-        <div>
+        <div id="EditImage">
             <label onformchange="PictureUrl"> Url </label>
             <InputText id="PictureUrl" @bind-Value="_Picture.PictureUrl" class="form-control" />
         </div>
         <div>
-            
+
             <InputNumber hidden id="EstateId" @bind-Value="_Picture.EstateId" class="form-control" />
         </div>
         <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -132,14 +147,14 @@ else
     <EditForm Model="_PictureInsert" OnSubmit="AddPicture">
         <DataAnnotationsValidator />
         <ValidationSummary />
-        <div>
+        <div id="AddImage">
             <label onformchange="PictureUrl"> Url </label>
             <InputText id="PictureUrl" @bind-Value="_PictureInsert.PictureUrl" class="form-control" />
         </div>
         <div>
             <label onformchange="Id"></label>
             <InputNumber hidden @bind-Value="_PictureInsert.EstateId" class="form-control" />
-        </div> 
+        </div>
         <button type="submit" class="btn btn-primary">Add Image</button>
     </EditForm>
     <p></p>
@@ -168,10 +183,31 @@ else
 
     private EditContext editContext;
 
+    ClaimsPrincipal? claimsPrincipalUser;
+    string? idFromClaim;
+    string? roleFromClaim;
+
 
     protected override async Task OnInitializedAsync()
     {
-        await Task.Delay(500); 
+        // await Task.Delay(500);
+
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        claimsPrincipalUser = authState.User;
+        if (claimsPrincipalUser.Identity is not null)
+        {
+            var idClaim = claimsPrincipalUser.FindFirst(c => c.Type == "RealtorId");
+            if (idClaim is not null)
+            {
+                idFromClaim = idClaim.Value;
+            }
+            var roleClaim = claimsPrincipalUser.FindFirst(c => c.Type == "role");
+            if (roleClaim is not null)
+            {
+                roleFromClaim = roleClaim.Value;
+            }
+        }
+
         _PictureInsert.EstateId = Id ?? 0;
 
         if (Id is not null)
@@ -215,7 +251,7 @@ else
     //Methods for editing images
     async Task ShowEditImages(int id)
     {
-        //if a picture edit button is clicked and its not the same picture that is already being edited, then switch or 
+        //if a picture edit button is clicked and its not the same picture that is already being edited, then switch or
         //just open that picture for editing instead.
         //otherwise just close the edit or open the edit.
         WishToEditImages = true;
@@ -224,13 +260,13 @@ else
             WishToEditImages = !WishToEditImages;
         }
         else
-        { 
+        {
             PictureId = id;
             var pictures = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<PictureDto>($"https://localhost:7190/api/Pictures/{PictureId}");
             if (pictures is not null)
             {
                 _Picture = pictures;
-            } 
+            }
         }
     }
 
@@ -269,7 +305,7 @@ else
         try
         {
             var result = await httpClientFactory.CreateClient("ServerApi").DeleteAsync($"https://localhost:7190/api/Pictures/{PictureId}");
-            NavigationManager.NavigateTo($"EstateDetails/{Id}", true); 
+            NavigationManager.NavigateTo($"EstateDetails/{Id}", true);
         }
         catch (WebException ex) when (response.StatusCode == HttpStatusCode.NotFound)
         {

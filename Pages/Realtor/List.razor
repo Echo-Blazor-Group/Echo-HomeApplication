@@ -12,7 +12,7 @@
     <p><em>Loading...</em></p>
 }
 
-<AuthorizeView>
+<AuthorizeView Roles="@SD.SuperAdmin">
     
         <div id="create-button">
             <Button Color="ButtonColor.Primary" @onclick="RedirectToCreateNew"><Icon Name="IconName.Clipboard" /> Add new</Button>

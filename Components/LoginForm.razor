@@ -11,7 +11,7 @@
 
 <EditForm method="post" Model="RealtorLogin" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
-    <h1>Login</h1>
+    <h1 style="outline:none;">Login</h1> @*Added outline:none here, otherwise the h1 hit-box was highlighted once redirected to login page...*@
     <hr />
     <div class="mb-3">
         <label for="email" class="form-label">Email: </label>

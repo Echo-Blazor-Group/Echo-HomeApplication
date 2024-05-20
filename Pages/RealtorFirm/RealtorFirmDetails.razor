@@ -4,6 +4,7 @@
 @inject IHttpClientFactory httpClientFactory
 @inject NavigationManager NavigationManager
 @inject ToastService ToastService
+@inject AuthenticationStateProvider authStateProvider
 @rendermode @(new InteractiveWebAssemblyRenderMode(prerender: false))
 @{
     /// <summary>
@@ -14,60 +15,110 @@
 
 <PageTitle>Edit realtor firm</PageTitle>
 
-<div>
-    @if (RealtorFirm is null)
-    {
-        <p><em>Loading...</em></p>
-    }
-    else {
-        <h1>Edit @RealtorFirm.Name</h1>
 
-        <div class="row">
-            <div class="col-md-4">
-                <EditForm method="post" Model="RealtorFirm">
-                    <DataAnnotationsValidator />
-                    <div class="mb-3">
-                        <label for="id" class="form-label">Id: </label>
-                        <InputNumber id="id" @bind-Value="RealtorFirm.Id" disabled class="form-control" />
-                        <ValidationMessage For="() => RealtorFirm.Id" class="text-danger" />
-                    </div>
-                    <div class="mb-3">
-                        <Switch @bind-Value="RealtorFirm.Active" Label="Currently active" />
-                        <ValidationMessage For="() => RealtorFirm.Active" class="text-danger" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="name" class="form-label">Name: </label>
-                        <InputText id="name" @bind-Value="RealtorFirm.Name" class="form-control" />
-                        <ValidationMessage For="() => RealtorFirm.Name" class="text-danger" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="presentation" class="form-label">About this firm: </label>
-                        <InputText id="presentation" @bind-Value="RealtorFirm.RealtorFirmPresentation" class="form-control" />
-                        <ValidationMessage For="() => RealtorFirm.RealtorFirmPresentation" class="text-danger" />
-                    </div>
-                    <div class="mb-3">
-                        <label for="Logotype" class="form-label">Logotype URL: </label>
-                        <InputText id="logotype" @bind-Value="RealtorFirm.Logotype" class="form-control" />
-                        <ValidationMessage For="() => RealtorFirm.Logotype" class="text-danger" />
-                    </div>
-                    <div class="mb-3">
-                        @* TODO: Use @onchange to give RealtorFirm.Logotype value more dynamically?
-                    Make the logotype display here after URL is input *@
-                        @if (RealtorFirm.Logotype != null)
-                        {
-                            <img src="@RealtorFirm.Logotype" alt="Logotype for @RealtorFirm.Name" width="200px" />
-                        }
-                    </div>
-                </EditForm>
-            </div>
+@if (RealtorFirm is null)
+{
+    <p><em>Loading...</em></p>
+}
+else if (roleFromClaim == @SD.SuperAdmin)
+{
+
+    <h1>Edit @RealtorFirm.Name</h1>
+
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="RealtorFirm">
+                <DataAnnotationsValidator />
+                @* <div class="mb-3">
+            <label for="id" class="form-label">Id: </label>
+            <InputNumber id="id" @bind-Value="RealtorFirm.Id" disabled class="form-control" />
+            <ValidationMessage For="() => RealtorFirm.Id" class="text-danger" />
+            </div> *@
+                <div class="mb-3">
+                    <Switch @bind-Value="RealtorFirm.Active" Label="Currently active" />
+                    <ValidationMessage For="() => RealtorFirm.Active" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name: </label>
+                    <InputText id="name" @bind-Value="RealtorFirm.Name" class="form-control" />
+                    <ValidationMessage For="() => RealtorFirm.Name" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="presentation" class="form-label">About this firm: </label>
+                    <InputText id="presentation" @bind-Value="RealtorFirm.RealtorFirmPresentation" class="form-control" />
+                    <ValidationMessage For="() => RealtorFirm.RealtorFirmPresentation" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="Logotype" class="form-label">Logotype URL: </label>
+                    <InputText id="logotype" @bind-Value="RealtorFirm.Logotype" class="form-control" />
+                    <ValidationMessage For="() => RealtorFirm.Logotype" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    @* TODO: Use @onchange to give RealtorFirm.Logotype value more dynamically?
+                Make the logotype display here after URL is input *@
+                    @if (RealtorFirm.Logotype != null)
+                    {
+                        <img src="@RealtorFirm.Logotype" alt="Logotype for @RealtorFirm.Name" width="200px" />
+                    }
+                </div>
+            </EditForm>
         </div>
-    }
-</div>
-<div>
-    <Button Type="ButtonType.Link" To="/realtorfirms" Color="ButtonColor.Secondary"><Icon Name="IconName.ArrowReturnLeft" /> Cancel</Button>
-    <Button Color="ButtonColor.Success" @onclick="() => EditAsync(RealtorFirm.Id)"><Icon Name="IconName.PencilSquare" /> Edit</Button>
-    <Button Color="ButtonColor.Danger" @onclick="() => DeleteAsync(RealtorFirm.Id)"><Icon Name="IconName.Trash" /> Delete</Button>
-</div>
+    </div>
+    <div>
+        <Button Type="ButtonType.Link" To="/realtorfirms" Color="ButtonColor.Secondary"><Icon Name="IconName.ArrowReturnLeft" /> Cancel</Button>
+        <Button Color="ButtonColor.Success" @onclick="() => EditAsync(RealtorFirm.Id)"><Icon Name="IconName.PencilSquare" /> Edit</Button>
+        <Button Color="ButtonColor.Danger" @onclick="() => DeleteAsync(RealtorFirm.Id)"><Icon Name="IconName.Trash" /> Delete</Button>
+    </div>
+}
+else
+{
+    <h1>@RealtorFirm.Name</h1>
+
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="RealtorFirm">
+                <DataAnnotationsValidator />
+                @* <div class="mb-3">
+            <label for="id" class="form-label">Id: </label>
+            <InputNumber id="id" @bind-Value="RealtorFirm.Id" disabled class="form-control" />
+            <ValidationMessage For="() => RealtorFirm.Id" class="text-danger" />
+            </div> *@
+                <div class="mb-3">
+                    <Switch @bind-Value="RealtorFirm.Active" Label="Currently active" disabled />
+                    <ValidationMessage For="() => RealtorFirm.Active" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="name" class="form-label">Name: </label>
+                    <InputText id="name" @bind-Value="RealtorFirm.Name" class="form-control" disabled />
+                    <ValidationMessage For="() => RealtorFirm.Name" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="presentation" class="form-label">About this firm: </label>
+                    <InputText id="presentation" @bind-Value="RealtorFirm.RealtorFirmPresentation" class="form-control" disabled />
+                    <ValidationMessage For="() => RealtorFirm.RealtorFirmPresentation" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="Logotype" class="form-label">Logotype URL: </label>
+                    <InputText id="logotype" @bind-Value="RealtorFirm.Logotype" class="form-control" disabled />
+                    <ValidationMessage For="() => RealtorFirm.Logotype" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    @* TODO: Use @onchange to give RealtorFirm.Logotype value more dynamically?
+                Make the logotype display here after URL is input *@
+                    @if (RealtorFirm.Logotype != null)
+                    {
+                        <img src="@RealtorFirm.Logotype" alt="Logotype for @RealtorFirm.Name" width="200px" />
+                    }
+                </div>
+            </EditForm>
+        </div>
+    </div>
+    <div>
+        <Button Type="ButtonType.Link" To="/realtorfirms" Color="ButtonColor.Secondary"><Icon Name="IconName.ArrowReturnLeft" /> Cancel</Button>
+    </div>
+}
+
+
 
 @code {
 
@@ -77,10 +128,23 @@
     [SupplyParameterFromForm]
     public RealtorFirmWithIdDTO RealtorFirm { get; set; }
 
+    ClaimsPrincipal? claimsPrincipalUser;
+    string? roleFromClaim;
+
 
     protected override async Task OnInitializedAsync()
     {
         await Task.Delay(500);
+        var authState = await authStateProvider.GetAuthenticationStateAsync();
+        claimsPrincipalUser = authState.User;
+        if (claimsPrincipalUser.Identity is not null)
+        {
+            var roleClaim = claimsPrincipalUser.FindFirst(c => c.Type == "role");
+            if (roleClaim is not null)
+            {
+                roleFromClaim = roleClaim.Value;
+            }
+        }
         RealtorFirm = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<RealtorFirmWithIdDTO>($"https://localhost:7190/api/RealtorFirm/{Id}");
 
         if (RealtorFirm is null)
@@ -95,14 +159,14 @@
         // https://demos.blazorbootstrap.com/confirm-dialog
 
         HttpResponseMessage response = new();
-        
+
         try
         {
             await httpClientFactory.CreateClient("ServerApi").PutAsJsonAsync<RealtorFirmWithIdDTO>($"https://localhost:7190/api/RealtorFirm/{id}", RealtorFirm);
             NavigationManager.NavigateTo("/realtorfirms");
             // (Samed) Send success toast message or Blazor Alert to next page
         }
-        catch(WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.NotFound)
+        catch (WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.NotFound)
         {
             NavigationManager.NavigateTo("/notfound");
         }
@@ -120,7 +184,7 @@
     {
         // TODO: (Samed) add delete confirmation here? "Are you sure..."-popup:
         // https://demos.blazorbootstrap.com/confirm-dialog
-        
+
         HttpResponseMessage response = new();
         try
         {
