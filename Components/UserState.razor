@@ -1,6 +1,7 @@
 ﻿@using Services
 @using Microsoft.AspNetCore.Components.Authorization
 @inject IAuthenticationService AuthenticationService
+@inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
 
 
@@ -12,17 +13,18 @@
 }
 
 @* If a user is logged in, display user name and show logout button *@
-@if(isLoggedIn)
+@if(userName != null)
 {
+<AuthorizeView Roles="@SD.SuperAdminOrRealtor">
     <li class="nav-item">
         <NavLink class="nav-link" href="/realtor">
             <span class="oi oi-plus" aria-hidden="true"></span> @userName
         </NavLink>
     </li>
     <li class="nav-item">
-        <Button Type="ButtonType.Submit" Color="ButtonColor.Primary" @onclick="LogoutAsync" value="Logout">Logout</Button>
+        <Button Type="ButtonType.Submit" Size="Size.ExtraSmall" Color="ButtonColor.Danger" @onclick="LogoutAsync" value="Logout">Logout</Button>
     </li>
-    
+</AuthorizeView>    
 }
 @* Else, show login link *@
 else
@@ -41,22 +43,51 @@ else
     // User is logged in if the LoginChange event holds a name string
     private bool isLoggedIn => userName is not null;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        base.OnInitialized();
+        //await base.OnInitializedAsync();
+        // Get current authentication state, calling built in method
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        // Retrieve user
+        var user = authState.User;
 
-        // Extract userName from LoginChange event
-        AuthenticationService.LoginChange += name =>
-        {
-            userName = name;
-            // Refresh rendering
-            StateHasChanged();
-        };
+        // Update the userName based on the initial authentication state
+        userName = user.Identity?.IsAuthenticated == true ? user.Identity.Name : null;
+
+        // Subscribe to authentication state changes
+        AuthStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+
+        // Subscribe to custom login change event
+        AuthenticationService.LoginChange += OnLoginChange;
+    }
+
+    private async void OnAuthenticationStateChanged(Task<AuthenticationState> task)
+    {
+        var authState = await task;
+        var user = authState.User;
+
+        // Update the userName based on the new authentication state
+        userName = user.Identity?.IsAuthenticated == true ? user.Identity.Name : null;
+
+        // Trigger a re-render
+        StateHasChanged();
+    }
+
+    private void OnLoginChange(string? name)
+    {
+        userName = name;
+        StateHasChanged();
     }
 
     private async Task LogoutAsync()
     {
         await AuthenticationService.LogoutAsync();
         NavigationManager.NavigateTo("/");
+    }
+
+    public void Dispose()
+    {
+        AuthStateProvider.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+        AuthenticationService.LoginChange -= OnLoginChange;
     }
 }
