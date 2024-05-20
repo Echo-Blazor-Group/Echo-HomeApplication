@@ -53,7 +53,7 @@
 
         if (realtorFirmsFromAPI == null)
         {
-            NavigationManager.NavigateTo("notfound");
+            NavigationManager.NavigateTo("/notfound");
         }
         _realtorFirms = realtorFirmsFromAPI.AsQueryable();
     }
@@ -62,7 +62,7 @@
     {
         if (id == null)
         {
-            NavigationManager.NavigateTo("notfound");
+            NavigationManager.NavigateTo("/notfound");
         }
         NavigationManager.NavigateTo($"/realtorfirm/details?id={id}");
     }

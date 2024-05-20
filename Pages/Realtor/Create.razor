@@ -101,7 +101,7 @@ else
                                         ?? new();
 
         if (!realtorFirms.Any())
-            NavigationManager.NavigateTo("notfound");
+            NavigationManager.NavigateTo("/notfound");
 
         realtorFirms.AsQueryable();
         realtorFirms = realtorFirms.Where(rf => rf.Active is true).ToList();
@@ -111,7 +111,7 @@ else
     private async Task CreateRealtorAsync(RealtorCreateDTO realtor)
     {
         if (realtor is null) 
-            NavigationManager.NavigateTo("notfound");
+            NavigationManager.NavigateTo("/notfound");
 
         await httpClientFactory.CreateClient("ServerApi").PostAsJsonAsync("https://localhost:7190/api/Realtor/register", realtor);
         await HideCreateConfirmationModalAsync();

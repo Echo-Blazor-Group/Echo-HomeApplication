@@ -135,7 +135,7 @@
 
         if (realtorsFromApi == null || realtorsFromApi.Count == 0)
         {
-            NavigationManager.NavigateTo("notfound");
+            NavigationManager.NavigateTo("/notfound");
         }
         realtors = realtorsFromApi.OrderBy(r => r.IsActive).ToList();
         return realtors.AsQueryable();
@@ -148,7 +148,7 @@
 
         if (realtorFirmsFromApi == null || realtorFirmsFromApi.Count == 0)
         {
-            NavigationManager.NavigateTo("notfound");
+            NavigationManager.NavigateTo("/notfound");
         }
         realtorFirms = realtorFirmsFromApi.OrderBy(r => r.Active).ToList();
         return realtorFirms.AsQueryable();
