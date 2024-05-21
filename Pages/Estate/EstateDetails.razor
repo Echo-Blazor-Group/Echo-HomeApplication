@@ -266,6 +266,8 @@ else
         else
         {
             PictureId = id;
+            WishToRemoveFromMarket = false;
+            WishToAddImages = false;
             var pictures = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<PictureDto>($"https://localhost:7190/api/Pictures/{PictureId}");
             if (pictures is not null)
             {
