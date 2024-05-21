@@ -9,6 +9,7 @@ using Services;
 
 namespace Echo_HomeApplication
 {
+    //Author: All
     public class Program
     {
         public static async Task Main(string[] args)
@@ -25,10 +26,6 @@ namespace Echo_HomeApplication
             ConfigureHttpClient(c => c.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress)).AddHttpMessageHandler<AuthenticationHandler>();
 
             builder.Services.AddWMBSC();
-
-            //builder.Services.AddSingleton<AuthStateProvider>();
-            //builder.Services.AddSingleton<AuthenticationStateProvider>(imp => imp.GetRequiredService<AuthStateProvider>());
-            //builder.Services.AddSingleton<IAuthenticationService, AuthenticationService>();
 
             builder.Services.AddScoped<AuthStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(imp => imp.GetRequiredService<AuthStateProvider>());
