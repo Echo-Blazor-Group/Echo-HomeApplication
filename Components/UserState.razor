@@ -1,8 +1,11 @@
-﻿@using Services
+﻿@using Blazored.SessionStorage
+@using Services
 @using Microsoft.AspNetCore.Components.Authorization
+@using System.IdentityModel.Tokens.Jwt
 @inject IAuthenticationService AuthenticationService
 @inject AuthenticationStateProvider AuthStateProvider
 @inject NavigationManager NavigationManager
+@inject ISessionStorageService SessionStorage
 
 
 @{
@@ -17,7 +20,7 @@
 {
 <AuthorizeView Roles="@SD.SuperAdminOrRealtor">
     <li class="nav-item">
-            <NavLink class="nav-link p-2 mt-4 me-2" href="/realtor/details/{userId}">
+            <NavLink class="nav-link p-2 mt-4 me-2" href="/realtor/details/{userid}">
             <span class="oi oi-plus" aria-hidden="true"></span> @userName
         </NavLink>
     </li>
@@ -40,18 +43,29 @@ else
 @code {
     // Variable to display name
     private string? userName;
-    private string? userId;
+    public string? UserId { get; set; }
     // User is logged in if the LoginChange event holds a name string
     private bool isLoggedIn => userName is not null;
+    const string JWT_KEY = nameof(JWT_KEY);
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
         base.OnInitialized();
-
-        var authState = AuthStateProvider.GetAuthenticationStateAsync();
         
         // TODO: Get id from AuthStateProvider.
-        // userId = ;
+        var authState = AuthStateProvider.GetAuthenticationStateAsync();
+        // UserId = authState.Result.User.Identity.????????????????????????????????;
+
+
+        // TODO: OR Get id from JWT.
+        // var token = await SessionStorage.GetItemAsync<string>(JWT_KEY);
+        // if(token is not null)
+        // {
+        //     JwtSecurityToken jwt = new JwtSecurityToken(token);
+        //     userId = jwt.Claims.First(c => c.Type == JwtRegisteredClaimNames.NameId).Value;
+        // }
+
+
         // Subscribe to the LoginChange event in AuthService
         AuthenticationService.LoginChange += name =>
         {
