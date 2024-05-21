@@ -29,7 +29,12 @@
     color:olive;
     
 }
-
+#navlight {
+    color: #C8A678;
+}
+    #navlight:hover {
+        color: #FC875B;
+    }
 #blazor-error-ui .dismiss {
     cursor: pointer;
     position: absolute;
