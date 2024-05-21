@@ -18,7 +18,6 @@
 @if (_Estate.Id == 0)
 {
     <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExOG9najZ5a243ZWZ2dmd3b281a2J0b2NtYmFudTd6NzA3eHRhMGt2eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/aQPFxg6JQQoaOfBoui/giphy.gif" height="1000px" width=“2000px />
-
 }
 else
 {
@@ -60,7 +59,6 @@ else
                 <td>@_Estate?.Realtor?.FirstName @_Estate?.Realtor?.LastName</td>
 
                 <AuthorizeView Roles="@SD.SuperAdminOrRealtor">
-
                     @if (idFromClaim == _Estate.Realtor.Id || roleFromClaim == SD.SuperAdmin)
                     {
                         <td><button class="btn btn-primary" @onclick="@(() => EstateEdit(@_Estate.Id))">Edit</button></td>
@@ -74,34 +72,17 @@ else
                         }
                         <td><button class="btn btn-primary" @onclick="@(() => ShowAddPicture(_Estate.Id))">Add Image</button></td>
                     }
-
                 </AuthorizeView>
             </tr>
             <tr>
                 <th>Estate Description</th>
             </tr>
-
             <p width="200px">@_Estate.EstateDescription</p>
-
-            <tr>
-                @foreach (var picture in _Estate.Pictures)
-                {
-                    <img src="@picture.PictureUrl" width="100px" />
-
-                    <AuthorizeView Roles="@SD.SuperAdminOrRealtor">
-                        @if (idFromClaim == _Estate.Realtor.Id || roleFromClaim == SD.SuperAdmin)
-                        {
-                            <td><button Class="btn btn-primary" @onclick="@(() => ShowEditImages(picture.Id))">Edit Image</button></td>
-                        }
-
-                    </AuthorizeView>
-                }
-            </tr>
         </thead>
+
     </table>
-}
-@if (WishToRemoveFromMarket == true)
-{
+    @if (WishToRemoveFromMarket == true)
+    {
     <EditForm Model="_Estate" OnSubmit="RemoveEstateFromMarket">
         <div id="MarketControl">
             <InputCheckbox hidden id="RemoveFromMarket" @bind-Value="_Estate.OnTheMarket" class="form-check" />
@@ -120,12 +101,11 @@ else
                 <button class="btn btn-primary" @onclick="@(() => Remove())">Don´t Return to market</button>
             </div>
         }
-
     </EditForm>
-}
+    }
 
-@if (WishToEditImages == true)
-{
+     @if (WishToEditImages == true)
+     {
     <td><button Class="btn btn-primary" @onclick="@(() => DeleteAsync(_Picture.Id))">Delete</button></td>
     <EditForm Model="_Picture" OnSubmit="EditImage">
         <div id="EditImage">
@@ -133,7 +113,6 @@ else
             <InputText id="PictureUrl" @bind-Value="_Picture.PictureUrl" class="form-control" />
         </div>
         <div>
-
             <InputNumber hidden id="EstateId" @bind-Value="_Picture.EstateId" class="form-control" />
         </div>
         <button type="submit" class="btn btn-primary">Save Changes</button>
@@ -142,9 +121,9 @@ else
     <div>
         <img src="@_Picture.PictureUrl" width="800px" />
     </div>
-}
-@if (WishToAddImages == true)
-{
+    }
+    @if (WishToAddImages == true)
+    {
     <EditForm Model="_PictureInsert" OnSubmit="AddPicture">
         <DataAnnotationsValidator />
         <ValidationSummary />
@@ -162,9 +141,28 @@ else
     <div>
         <img src="@_PictureInsert.PictureUrl" width="400px" />
     </div>
+    }
+    
+    <div class="row">
+    @foreach (var estate in _Estate.Pictures)
+    {
+        <div class="col-md-4 mt-4">
+            <Card class="mb-8 card col-md-4 mt-4" Style="width:26rem;">
+                <img src="@estate.PictureUrl" />
+                <CardBody>
+                    <AuthorizeView Roles="@SD.SuperAdminOrRealtor">
+                        @if (idFromClaim == _Estate.Realtor.Id || roleFromClaim == SD.SuperAdmin)
+                        {
+                            <button Class="btn btn-primary" @onclick="@(() => ShowEditImages(@estate.Id))">Edit Image</button>
+                        }
+                    </AuthorizeView>
+                </CardBody>
+            </Card>
+        </div>
+    }
+    </div>
+    
 }
-
-
 @code {
     [Parameter]
     public int? Id { get; set; }
@@ -208,7 +206,6 @@ else
                 roleFromClaim = roleClaim.Value;
             }
         }
-
         _PictureInsert.EstateId = Id ?? 0;
 
         if (Id is not null)
@@ -245,6 +242,8 @@ else
     {
         //Simplified function provided by Sebbe!
         WishToRemoveFromMarket = !WishToRemoveFromMarket;
+        WishToEditImages = false;
+        WishToAddImages = false;
         //  if (WishToRemoveFromMarket == false) { WishToRemoveFromMarket = true; }
         // else { WishToRemoveFromMarket = false; }
     }
@@ -255,10 +254,14 @@ else
         //if a picture edit button is clicked and its not the same picture that is already being edited, then switch or
         //just open that picture for editing instead.
         //otherwise just close the edit or open the edit.
+        
         WishToEditImages = true;
         if (id == PictureId)
         {
+            PictureId = -1;
             WishToEditImages = !WishToEditImages;
+            WishToRemoveFromMarket = false;
+            WishToAddImages = false;
         }
         else
         {
@@ -286,6 +289,8 @@ else
     async Task ShowAddPicture(int id)
     {
         WishToAddImages = !WishToAddImages;
+        WishToRemoveFromMarket = false;
+        WishToEditImages = false;
         _PictureInsert.EstateId = id;
     }
     async Task AddPicture()
