@@ -20,7 +20,7 @@
 {
 <AuthorizeView Roles="@SD.SuperAdminOrRealtor">
     <li class="nav-item">
-            <NavLink class="nav-link p-2 mt-4 me-2" href="/realtor/details/{userid}">
+            <NavLink id="navlight" class="nav-link p-2 mt-4 me-2" href="/realtor/details/{userid}">
             <span class="oi oi-plus" aria-hidden="true"></span> @userName
         </NavLink>
     </li>
@@ -33,7 +33,7 @@
 else
 {
     <li class="nav-item">
-        <NavLink class="nav-link p-2 mt-4 me-2" href="/login">
+        <NavLink id="navlight" class="nav-link p-2 mt-4 me-2" href="/login">
             <span class="oi oi-plus" aria-hidden="true"></span> Login
         </NavLink>
     </li>
