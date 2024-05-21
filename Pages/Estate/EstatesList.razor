@@ -52,11 +52,11 @@ else
                         <input type="search" @bind="filteredCategory" @bind:event="oninput" placeholder="search category" />
                     </ColumnOptions>
                 </PropertyColumn>
-@*                 <PropertyColumn Property="e => e.Realtor.FirstName + e.Realtor.LastName" Title="Realtor">
-                    <ColumnOptions>
-                        <input type="search" @bind="filteredRealtor" @bind:event="oninput" placeholder="search realtor" />
-                    </ColumnOptions>
-                </PropertyColumn> *@<div class="col-md-1">
+                @*                 <PropertyColumn Property="e => e.Realtor.FirstName + e.Realtor.LastName" Title="Realtor">
+            <ColumnOptions>
+            <input type="search" @bind="filteredRealtor" @bind:event="oninput" placeholder="search realtor" />
+            </ColumnOptions>
+            </PropertyColumn> *@<div class="col-md-1">
                     <TemplateColumn Context="estates" title="Pictures">
                         <img src="@estates.Pictures.FirstOrDefault().PictureUrl" width="300px" />
                     </TemplateColumn>
@@ -72,52 +72,53 @@ else
     <AuthorizeView Roles="@SD.SuperAdminOrRealtor">
         <button class="btn btn-primary" @onclick="EstateAdd">Add A New Estate</button>
     </AuthorizeView>
-    
-    
 
-    <h2>Estates off the market</h2>
-    <QuickGrid Class="table" Items="FilteredEstates.Where(e =>e.OnTheMarket == false)" Pagination="paginationOffTheMarket">
-        <PropertyColumn Property="e => e.Address" Title="Adress"></PropertyColumn>
-        <PropertyColumn Property="e => e.StartingPrice" Title="Starting Price" Sortable="true">
-            <ColumnOptions>
-                <p>Min: <input type="range" @bind="minPrice" @bind:event="oninput" min="1" max="6000000" />@minPrice</p>
-                <p>Max: <input type="range" @bind="maxPrice" @bind:event="oninput" min="1" max="6000000" />@maxPrice</p>
-            </ColumnOptions>
-        </PropertyColumn>
-        <PropertyColumn Property="e => e.LivingAreaKvm" Title="LivingArea Kvm" Sortable="true">
-            <ColumnOptions>
-                <p>Min: <input type="range" @bind="minArea" @bind:event="oninput" min="1" max="500" />@minArea</p>
-                <p>Max: <input type="range" @bind="maxArea" @bind:event="oninput" min="1" max="500" />@maxArea</p>
-            </ColumnOptions>
-        </PropertyColumn>
-        <PropertyColumn Property="e => e.NumberOfRooms" Title="Number of rooms" Sortable="true">
-            <ColumnOptions>
-                <p>Min: <input type="range" @bind="minRoom" @bind:event="oninput" min="1" max="25" />@minRoom</p>
-                <p>Max: <input type="range" @bind="maxRoom" @bind:event="oninput" min="1" max="25" />@maxRoom</p>
-            </ColumnOptions>
-        </PropertyColumn>
-        <PropertyColumn Property="e => e.EstateAreaKvm" Title="EstateArea Kvm"></PropertyColumn>
-        <PropertyColumn Property="e => e.ConstructionDate" Title="Construction Date"></PropertyColumn>
-        <PropertyColumn Property="e => e.County.CountyName" Title="County" Sortable="true">
-            <ColumnOptions>
-                <input type="search" @bind="filteredCounty" @bind:event="oninput" placeholder="search location" />
-            </ColumnOptions>
-        </PropertyColumn>
-        <PropertyColumn Property="e => e.Category.EstateCategory" Title="Category" Sortable="true">
-            <ColumnOptions>
-                <input type="search" @bind="filteredCategory" @bind:event="oninput" placeholder="search category" />
-            </ColumnOptions>
-        </PropertyColumn>
-        <PropertyColumn Property="e => e.Realtor.FirstName + e.Realtor.LastName" Title="Realtor">
-            <ColumnOptions>
-                <input type="search" @bind="filteredRealtor" @bind:event="oninput" placeholder="search realtor" />
-            </ColumnOptions>
-        </PropertyColumn>
-        <TemplateColumn Context="estates" Title="Handle">
-            <Button Color="ButtonColor.Primary" @onclick="() => EstateDetails(estates.Id)"><Icon Name="IconName.FileText" /> Details</Button>
-        </TemplateColumn>
-    </QuickGrid>
-    <Paginator State="@paginationOffTheMarket"></Paginator>
+
+    <AuthorizeView Roles="@SD.SuperAdmin">
+        <h2>Estates off the market</h2>
+        <QuickGrid Class="table" Items="FilteredEstates.Where(e =>e.OnTheMarket == false)" Pagination="paginationOffTheMarket">
+            <PropertyColumn Property="e => e.Address" Title="Adress"></PropertyColumn>
+            <PropertyColumn Property="e => e.StartingPrice" Title="Starting Price" Sortable="true">
+                <ColumnOptions>
+                    <p>Min: <input type="range" @bind="minPrice" @bind:event="oninput" min="1" max="6000000" />@minPrice</p>
+                    <p>Max: <input type="range" @bind="maxPrice" @bind:event="oninput" min="1" max="6000000" />@maxPrice</p>
+                </ColumnOptions>
+            </PropertyColumn>
+            <PropertyColumn Property="e => e.LivingAreaKvm" Title="LivingArea Kvm" Sortable="true">
+                <ColumnOptions>
+                    <p>Min: <input type="range" @bind="minArea" @bind:event="oninput" min="1" max="500" />@minArea</p>
+                    <p>Max: <input type="range" @bind="maxArea" @bind:event="oninput" min="1" max="500" />@maxArea</p>
+                </ColumnOptions>
+            </PropertyColumn>
+            <PropertyColumn Property="e => e.NumberOfRooms" Title="Number of rooms" Sortable="true">
+                <ColumnOptions>
+                    <p>Min: <input type="range" @bind="minRoom" @bind:event="oninput" min="1" max="25" />@minRoom</p>
+                    <p>Max: <input type="range" @bind="maxRoom" @bind:event="oninput" min="1" max="25" />@maxRoom</p>
+                </ColumnOptions>
+            </PropertyColumn>
+            <PropertyColumn Property="e => e.EstateAreaKvm" Title="EstateArea Kvm"></PropertyColumn>
+            <PropertyColumn Property="e => e.ConstructionDate" Title="Construction Date"></PropertyColumn>
+            <PropertyColumn Property="e => e.County.CountyName" Title="County" Sortable="true">
+                <ColumnOptions>
+                    <input type="search" @bind="filteredCounty" @bind:event="oninput" placeholder="search location" />
+                </ColumnOptions>
+            </PropertyColumn>
+            <PropertyColumn Property="e => e.Category.EstateCategory" Title="Category" Sortable="true">
+                <ColumnOptions>
+                    <input type="search" @bind="filteredCategory" @bind:event="oninput" placeholder="search category" />
+                </ColumnOptions>
+            </PropertyColumn>
+            <PropertyColumn Property="e => e.Realtor.FirstName + e.Realtor.LastName" Title="Realtor">
+                <ColumnOptions>
+                    <input type="search" @bind="filteredRealtor" @bind:event="oninput" placeholder="search realtor" />
+                </ColumnOptions>
+            </PropertyColumn>
+            <TemplateColumn Context="estates" Title="Handle">
+                <Button Color="ButtonColor.Primary" @onclick="() => EstateDetails(estates.Id)"><Icon Name="IconName.FileText" /> Details</Button>
+            </TemplateColumn>
+        </QuickGrid>
+        <Paginator State="@paginationOffTheMarket"></Paginator>
+    </AuthorizeView>
 }
 
 @code {
