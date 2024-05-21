@@ -14,7 +14,9 @@
 
 @if (estates.Count == 0)
 {
-    <p><em>Loading...</em></p>
+
+    <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExOG9najZ5a243ZWZ2dmd3b281a2J0b2NtYmFudTd6NzA3eHRhMGt2eSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/aQPFxg6JQQoaOfBoui/giphy.gif" height="1000px" width=“2000px />
+    
 }
 else
 {
@@ -141,7 +143,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await Task.Delay(500);
+        await Task.Delay(5000);
 
         var result = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<EstateDto>>("https://localhost:7190/api/Estate");
         var category = await httpClientFactory.CreateClient("ServerApi").GetFromJsonAsync<List<Category>>("https://localhost:7190/api/Category");

@@ -35,6 +35,15 @@
     #navlight:hover {
         color: #FC875B;
     }
+
+#loader {
+    position: fixed;
+    width: 100%;
+    height: 100vh;
+    block-size: fit-content;
+    background-image: url(~/Images/animation.gif);
+    
+}
 #blazor-error-ui .dismiss {
     cursor: pointer;
     position: absolute;
